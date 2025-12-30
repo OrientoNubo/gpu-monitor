@@ -28,7 +28,22 @@
     .main { padding: 24px; }
     .loading, .error { text-align: center; padding: 48px; font-size: 16px; }
     .error { color: #f85149; }
-    .server-grid { display: grid; gap: 24px; }
+
+    /* Two-column layout for DDC nodes */
+    .server-grid {
+      display: grid;
+      gap: 24px;
+    }
+    .server-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 1200px) {
+      .server-row {
+        grid-template-columns: 1fr;
+      }
+    }
 
     .server-card {
       background: #161b22;
@@ -60,10 +75,14 @@
     .system-metrics {
       padding: 12px 16px;
       border-bottom: 1px solid #30363d;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 16px;
     }
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .metrics-row:last-child { margin-bottom: 0; }
     .metric { display: flex; flex-direction: column; gap: 4px; }
     .metric-label {
       font-size: 11px;
@@ -71,11 +90,11 @@
       color: #8b949e;
       text-transform: uppercase;
     }
-    .metric-value { font-size: 18px; font-weight: 600; color: #f0f6fc; }
+    .metric-value { font-size: 16px; font-weight: 600; color: #f0f6fc; }
     .metric-value.low { color: #3fb950; }
     .metric-value.medium { color: #f0883e; }
     .metric-value.high { color: #f85149; }
-    .metric-detail { font-size: 12px; color: #8b949e; }
+    .metric-detail { font-size: 11px; color: #8b949e; }
     .progress-bar {
       height: 4px;
       background: #30363d;
@@ -84,6 +103,26 @@
       margin-top: 4px;
     }
     .progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+
+    .disks-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #30363d;
+    }
+    .disks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+    }
+    .disk-item {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 8px 10px;
+    }
+    .disk-mount { font-size: 12px; font-weight: 600; color: #58a6ff; margin-bottom: 4px; }
+    .disk-device { font-size: 10px; color: #8b949e; margin-bottom: 4px; }
+    .disk-usage { font-size: 11px; color: #c9d1d9; }
 
     .gpu-section { padding: 12px 16px; }
     .section-title {
@@ -175,6 +214,19 @@
       return 'low';
     }
 
+    // Filter out virtual/snap devices, keep real disks
+    function filterDisks(disks) {
+      return (disks || []).filter(d => {
+        // Exclude loop devices (snap packages)
+        if (d.device.startsWith('/dev/loop')) return false;
+        // Exclude snap mounts
+        if (d.mount_point.includes('/snap/')) return false;
+        // Exclude boot/efi if small
+        if (d.mount_point === '/boot/efi' && d.total_bytes < 2000000000) return false;
+        return true;
+      });
+    }
+
     function renderServer(server) {
       const isOnline = server.status === 'online';
 
@@ -192,38 +244,45 @@
       if (isOnline && server.system) {
         const cpu = server.system.cpu || {};
         const mem = server.system.memory || {};
-        const disks = (server.system.disks || []).filter(d =>
-          ['/', '/home', '/data'].includes(d.mount_point)
-        ).slice(0, 2);
+        const disks = filterDisks(server.system.disks);
 
         html += `
           <div class="system-metrics">
-            <div class="metric">
-              <span class="metric-label">CPU</span>
-              <span class="metric-value ${getUsageClass(cpu.usage_percent)}">${cpu.usage_percent?.toFixed(1) || 0}%</span>
-              <span class="metric-detail">${cpu.cores || 0} cores</span>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: ${cpu.usage_percent || 0}%; background: ${getUsageColor(cpu.usage_percent)}"></div>
-              </div>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Memory</span>
-              <span class="metric-value ${getUsageClass(mem.usage_percent)}">${formatBytes(mem.used_bytes)}</span>
-              <span class="metric-detail">/ ${formatBytes(mem.total_bytes)} (${mem.usage_percent?.toFixed(1) || 0}%)</span>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: ${mem.usage_percent || 0}%; background: ${getUsageColor(mem.usage_percent)}"></div>
-              </div>
-            </div>
-            ${disks.map(d => `
+            <div class="metrics-row">
               <div class="metric">
-                <span class="metric-label">${d.mount_point}</span>
-                <span class="metric-value">${formatBytes(d.used_bytes)}</span>
-                <span class="metric-detail">/ ${formatBytes(d.total_bytes)} (${d.usage_percent?.toFixed(1)}%)</span>
+                <span class="metric-label">CPU</span>
+                <span class="metric-value ${getUsageClass(cpu.usage_percent)}">${cpu.usage_percent?.toFixed(1) || 0}%</span>
+                <span class="metric-detail">${cpu.cores || 0} cores</span>
                 <div class="progress-bar">
-                  <div class="progress-fill" style="width: ${d.usage_percent}%; background: #8b949e"></div>
+                  <div class="progress-fill" style="width: ${cpu.usage_percent || 0}%; background: ${getUsageColor(cpu.usage_percent)}"></div>
                 </div>
               </div>
-            `).join('')}
+              <div class="metric">
+                <span class="metric-label">Memory</span>
+                <span class="metric-value ${getUsageClass(mem.usage_percent)}">${formatBytes(mem.used_bytes)}</span>
+                <span class="metric-detail">/ ${formatBytes(mem.total_bytes)} (${mem.usage_percent?.toFixed(1) || 0}%)</span>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: ${mem.usage_percent || 0}%; background: ${getUsageColor(mem.usage_percent)}"></div>
+                </div>
+              </div>
+            </div>
+            ${disks.length > 0 ? `
+              <div class="disks-section">
+                <span class="metric-label">Disks (${disks.length})</span>
+                <div class="disks-grid">
+                  ${disks.map(d => `
+                    <div class="disk-item">
+                      <div class="disk-mount">${d.mount_point}</div>
+                      <div class="disk-device">${d.device}</div>
+                      <div class="disk-usage">${formatBytes(d.used_bytes)} / ${formatBytes(d.total_bytes)} (${d.usage_percent?.toFixed(1)}%)</div>
+                      <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${d.usage_percent}%; background: ${getUsageColor(d.usage_percent)}"></div>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
           </div>
         `;
 
@@ -279,6 +338,23 @@
       return html;
     }
 
+    function sortServers(servers) {
+      // Sort: node0 first, then node1, then others
+      return servers.sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        // DDC nodes first
+        const aIsDDC = aName.includes('ddc');
+        const bIsDDC = bName.includes('ddc');
+        if (aIsDDC && !bIsDDC) return -1;
+        if (!aIsDDC && bIsDDC) return 1;
+        // node0 before node1
+        const aNode = aName.match(/node\s*(\d+)/)?.[1] || '99';
+        const bNode = bName.match(/node\s*(\d+)/)?.[1] || '99';
+        return parseInt(aNode) - parseInt(bNode);
+      });
+    }
+
     async function fetchData() {
       try {
         const res = await fetch(`data/status.json?t=${Date.now()}`);
@@ -291,11 +367,28 @@
           `Version: ${data.collector_version || '-'}`;
 
         if (data.servers && data.servers.length > 0) {
-          document.getElementById('content').innerHTML = `
-            <div class="server-grid">
-              ${data.servers.map(renderServer).join('')}
-            </div>
-          `;
+          const sorted = sortServers([...data.servers]);
+
+          // Separate DDC nodes and others
+          const ddcNodes = sorted.filter(s => s.name.toLowerCase().includes('ddc'));
+          const otherNodes = sorted.filter(s => !s.name.toLowerCase().includes('ddc'));
+
+          let html = '<div class="server-grid">';
+
+          // DDC nodes in two-column layout
+          if (ddcNodes.length >= 2) {
+            html += `<div class="server-row">${ddcNodes.map(renderServer).join('')}</div>`;
+          } else if (ddcNodes.length === 1) {
+            html += renderServer(ddcNodes[0]);
+          }
+
+          // Other nodes in single column
+          otherNodes.forEach(s => {
+            html += renderServer(s);
+          });
+
+          html += '</div>';
+          document.getElementById('content').innerHTML = html;
         } else {
           document.getElementById('content').innerHTML = '<div class="loading">No servers configured</div>';
         }
