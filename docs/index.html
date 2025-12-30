@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPU Monitor</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+      background: #0d1117;
+      color: #c9d1d9;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    .header {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .header h1 { font-size: 20px; font-weight: 600; color: #f0f6fc; }
+    .update-info { font-size: 13px; color: #8b949e; }
+    .main { padding: 24px; }
+    .loading, .error { text-align: center; padding: 48px; font-size: 16px; }
+    .error { color: #f85149; }
+    .server-grid { display: grid; gap: 24px; }
+
+    .server-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .server-card.offline { opacity: 0.7; }
+    .server-header {
+      background: #21262d;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #30363d;
+    }
+    .server-title { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+    .server-title h2 { font-size: 16px; font-weight: 600; color: #f0f6fc; }
+    .hostname { font-size: 13px; color: #8b949e; }
+    .status-badge {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+    .status-badge.online { background: rgba(35, 134, 54, 0.2); color: #3fb950; }
+    .status-badge.offline { background: rgba(248, 81, 73, 0.2); color: #f85149; }
+
+    .system-metrics {
+      padding: 12px 16px;
+      border-bottom: 1px solid #30363d;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+    }
+    .metric { display: flex; flex-direction: column; gap: 4px; }
+    .metric-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #8b949e;
+      text-transform: uppercase;
+    }
+    .metric-value { font-size: 18px; font-weight: 600; color: #f0f6fc; }
+    .metric-value.low { color: #3fb950; }
+    .metric-value.medium { color: #f0883e; }
+    .metric-value.high { color: #f85149; }
+    .metric-detail { font-size: 12px; color: #8b949e; }
+    .progress-bar {
+      height: 4px;
+      background: #30363d;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+
+    .gpu-section { padding: 12px 16px; }
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #8b949e;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    .gpu-list { display: flex; flex-direction: column; gap: 8px; }
+    .gpu-card {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+    .gpu-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .gpu-index { color: #58a6ff; font-weight: 600; }
+    .gpu-name { color: #a371f7; font-weight: 500; flex: 1; }
+    .driver-version { font-size: 11px; color: #8b949e; }
+    .gpu-metrics { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+    .gpu-metric { display: flex; flex-direction: column; gap: 2px; }
+    .gpu-metric.memory { flex: 1; min-width: 120px; }
+    .gpu-metric-label { font-size: 10px; color: #8b949e; text-transform: uppercase; }
+    .gpu-metric-value { font-size: 14px; font-weight: 600; }
+
+    .processes { margin-top: 8px; padding-top: 8px; border-top: 1px solid #30363d; display: flex; flex-wrap: wrap; gap: 8px; }
+    .process { font-size: 12px; }
+    .process-user { color: #8b949e; }
+    .process-cmd { color: #58a6ff; }
+    .process-pid { color: #8b949e; }
+    .process-mem { color: #f0883e; }
+
+    .footer {
+      background: #161b22;
+      border-top: 1px solid #30363d;
+      padding: 12px 24px;
+      text-align: center;
+      font-size: 12px;
+      color: #8b949e;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>GPU Monitor</h1>
+    <div class="update-info" id="update-info">Loading...</div>
+  </header>
+
+  <main class="main">
+    <div id="content" class="loading">Loading...</div>
+  </main>
+
+  <footer class="footer">
+    <p>Auto-refresh: 60s | <span id="version">-</span></p>
+  </footer>
+
+  <script>
+    const REFRESH_INTERVAL = 60000;
+
+    function formatBytes(bytes) {
+      if (!bytes) return '0 B';
+      const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+      let i = 0, value = bytes;
+      while (value >= 1024 && i < units.length - 1) { value /= 1024; i++; }
+      return `${value.toFixed(i > 1 ? 1 : 0)} ${units[i]}`;
+    }
+
+    function formatMemory(mb) {
+      return mb >= 1024 ? `${(mb / 1024).toFixed(1)}G` : `${mb}M`;
+    }
+
+    function getUsageClass(percent) {
+      if (percent >= 80) return 'high';
+      if (percent >= 50) return 'medium';
+      return 'low';
+    }
+
+    function getUsageColor(percent) {
+      if (percent >= 80) return '#f85149';
+      if (percent >= 50) return '#f0883e';
+      return '#3fb950';
+    }
+
+    function getTempClass(temp) {
+      if (temp >= 80) return 'high';
+      if (temp >= 70) return 'medium';
+      if (temp >= 50) return 'medium';
+      return 'low';
+    }
+
+    function renderServer(server) {
+      const isOnline = server.status === 'online';
+
+      let html = `
+        <div class="server-card ${isOnline ? '' : 'offline'}">
+          <div class="server-header">
+            <div class="server-title">
+              <h2>${server.name}</h2>
+              <span class="hostname">(${server.hostname || server.host})</span>
+            </div>
+            <span class="status-badge ${server.status}">${server.status}</span>
+          </div>
+      `;
+
+      if (isOnline && server.system) {
+        const cpu = server.system.cpu || {};
+        const mem = server.system.memory || {};
+        const disks = (server.system.disks || []).filter(d =>
+          ['/', '/home', '/data'].includes(d.mount_point)
+        ).slice(0, 2);
+
+        html += `
+          <div class="system-metrics">
+            <div class="metric">
+              <span class="metric-label">CPU</span>
+              <span class="metric-value ${getUsageClass(cpu.usage_percent)}">${cpu.usage_percent?.toFixed(1) || 0}%</span>
+              <span class="metric-detail">${cpu.cores || 0} cores</span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${cpu.usage_percent || 0}%; background: ${getUsageColor(cpu.usage_percent)}"></div>
+              </div>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Memory</span>
+              <span class="metric-value ${getUsageClass(mem.usage_percent)}">${formatBytes(mem.used_bytes)}</span>
+              <span class="metric-detail">/ ${formatBytes(mem.total_bytes)} (${mem.usage_percent?.toFixed(1) || 0}%)</span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${mem.usage_percent || 0}%; background: ${getUsageColor(mem.usage_percent)}"></div>
+              </div>
+            </div>
+            ${disks.map(d => `
+              <div class="metric">
+                <span class="metric-label">${d.mount_point}</span>
+                <span class="metric-value">${formatBytes(d.used_bytes)}</span>
+                <span class="metric-detail">/ ${formatBytes(d.total_bytes)} (${d.usage_percent?.toFixed(1)}%)</span>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: ${d.usage_percent}%; background: #8b949e"></div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+
+        if (server.gpus && server.gpus.length > 0) {
+          html += `
+            <div class="gpu-section">
+              <h3 class="section-title">GPUs (${server.gpus.length})</h3>
+              <div class="gpu-list">
+                ${server.gpus.map(gpu => `
+                  <div class="gpu-card">
+                    <div class="gpu-header">
+                      <span class="gpu-index">[${gpu.index}]</span>
+                      <span class="gpu-name">${gpu.name}</span>
+                      <span class="driver-version">${gpu.driver_version}</span>
+                    </div>
+                    <div class="gpu-metrics">
+                      <div class="gpu-metric">
+                        <span class="gpu-metric-label">Temp</span>
+                        <span class="gpu-metric-value ${getTempClass(gpu.temperature_celsius)}">${gpu.temperature_celsius}'C</span>
+                      </div>
+                      <div class="gpu-metric">
+                        <span class="gpu-metric-label">GPU</span>
+                        <span class="gpu-metric-value ${gpu.utilization_percent > 10 ? 'low' : ''}">${gpu.utilization_percent}%</span>
+                      </div>
+                      <div class="gpu-metric memory">
+                        <span class="gpu-metric-label">VRAM</span>
+                        <span class="gpu-metric-value">${formatMemory(gpu.memory.used_mb)} / ${formatMemory(gpu.memory.total_mb)}</span>
+                        <div class="progress-bar">
+                          <div class="progress-fill" style="width: ${gpu.memory.usage_percent}%; background: #a371f7"></div>
+                        </div>
+                      </div>
+                    </div>
+                    ${gpu.processes && gpu.processes.length > 0 ? `
+                      <div class="processes">
+                        ${gpu.processes.map(p => `
+                          <span class="process">
+                            <span class="process-user">${p.user}:</span><span class="process-cmd">${p.command}</span><span class="process-pid">/${p.pid}</span><span class="process-mem">(${p.gpu_memory_mb}M)</span>
+                          </span>
+                        `).join(' ')}
+                      </div>
+                    ` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+      } else if (!isOnline) {
+        html += `<div style="padding: 24px 16px; color: #f85149;">${server.error_message || 'Connection failed'}</div>`;
+      }
+
+      html += '</div>';
+      return html;
+    }
+
+    async function fetchData() {
+      try {
+        const res = await fetch(`data/status.json?t=${Date.now()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        document.getElementById('update-info').textContent =
+          `Last updated: ${new Date(data.timestamp).toLocaleString()}`;
+        document.getElementById('version').textContent =
+          `Version: ${data.collector_version || '-'}`;
+
+        if (data.servers && data.servers.length > 0) {
+          document.getElementById('content').innerHTML = `
+            <div class="server-grid">
+              ${data.servers.map(renderServer).join('')}
+            </div>
+          `;
+        } else {
+          document.getElementById('content').innerHTML = '<div class="loading">No servers configured</div>';
+        }
+      } catch (e) {
+        document.getElementById('content').innerHTML = `<div class="error">Failed to load: ${e.message}</div>`;
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, REFRESH_INTERVAL);
+  </script>
+</body>
+</html>
