@@ -301,9 +301,11 @@
     function getChartColors() {
       const theme = document.documentElement.getAttribute('data-theme');
       return {
+        cpu: theme === 'light' ? '#1a7f37' : '#3fb950',
         util: theme === 'light' ? '#8250df' : '#a371f7',
         temp: theme === 'light' ? '#bf5000' : '#f0883e',
         mem: theme === 'light' ? '#0969da' : '#58a6ff',
+        disk: theme === 'light' ? '#bf5000' : '#f0883e',
         grid: theme === 'light' ? '#d0d7de' : '#30363d',
         text: theme === 'light' ? '#656d76' : '#8b949e',
       };
@@ -452,13 +454,36 @@
       const latestServer = serverData[serverData.length - 1].server;
       const gpuCount = latestServer.gpus?.length || 0;
 
-      if (gpuCount === 0) {
-        document.getElementById('content').innerHTML = '<div class="no-data">No GPU data available</div>';
-        return;
-      }
-
       const colors = getChartColors();
       let html = '';
+
+      // System metrics section (CPU / Memory / Disk)
+      html += `
+        <div class="gpu-section">
+          <div class="gpu-section-header">
+            <div class="gpu-section-title">
+              <span>📊</span>
+              <span class="gpu-name">System Metrics</span>
+            </div>
+          </div>
+          <div class="gpu-section-content">
+            <div class="charts-row">
+              <div class="chart-card">
+                <div class="chart-title">CPU Usage</div>
+                <div class="chart-container"><canvas id="sys-cpu"></canvas></div>
+              </div>
+              <div class="chart-card">
+                <div class="chart-title">Memory Usage</div>
+                <div class="chart-container"><canvas id="sys-mem"></canvas></div>
+              </div>
+              <div class="chart-card">
+                <div class="chart-title">Disk Usage (/)</div>
+                <div class="chart-container"><canvas id="sys-disk"></canvas></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
 
       // Create section for each GPU
       for (let gpuIdx = 0; gpuIdx < gpuCount; gpuIdx++) {
@@ -527,6 +552,38 @@
       }
 
       document.getElementById('content').innerHTML = html;
+
+      // Create system metrics charts
+      const cpuData = serverData.map(d => ({
+        x: new Date(d.timestamp),
+        y: d.server.system?.cpu?.usage_percent || 0
+      }));
+      const memData = serverData.map(d => ({
+        x: new Date(d.timestamp),
+        y: d.server.system?.memory?.usage_percent || 0
+      }));
+      // Find root disk or first disk
+      const diskData = serverData.map(d => {
+        const disks = d.server.system?.disks || [];
+        const rootDisk = disks.find(disk => disk.mount_point === '/') || disks[0];
+        return {
+          x: new Date(d.timestamp),
+          y: rootDisk?.usage_percent || 0
+        };
+      });
+
+      charts['sys-cpu'] = createChart(
+        document.getElementById('sys-cpu').getContext('2d'),
+        'CPU', cpuData, colors.cpu, '%'
+      );
+      charts['sys-mem'] = createChart(
+        document.getElementById('sys-mem').getContext('2d'),
+        'Memory', memData, colors.mem, '%'
+      );
+      charts['sys-disk'] = createChart(
+        document.getElementById('sys-disk').getContext('2d'),
+        'Disk', diskData, colors.disk, '%'
+      );
 
       // Create charts for each GPU
       for (let gpuIdx = 0; gpuIdx < gpuCount; gpuIdx++) {
