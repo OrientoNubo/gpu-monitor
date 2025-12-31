@@ -177,11 +177,11 @@
   </main>
 
   <footer class="footer">
-    <p>Auto-refresh: 60s | <span id="version">-</span></p>
+    <p>Auto-refresh: 30s | Data update: 1min | <span id="version">-</span></p>
   </footer>
 
   <script>
-    const REFRESH_INTERVAL = 60000;
+    const REFRESH_INTERVAL = 30000; // 30 seconds
 
     function formatBytes(bytes) {
       if (!bytes) return '0 B';
