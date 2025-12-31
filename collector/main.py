@@ -166,6 +166,39 @@ def save_output(data: Dict[str, Any], output_file: str, verbose: bool = False) -
         print(f"Output saved to {output_path}")
 
 
+def save_history(data: Dict[str, Any], output_file: str, max_entries: int = 10080, verbose: bool = False) -> None:
+    """
+    Save data to history file, maintaining a rolling window.
+    Default max_entries=10080 keeps ~7 days of data at 1-minute intervals.
+    """
+    # History file is next to the status file
+    output_path = Path(output_file)
+    history_path = output_path.parent / "history.json"
+
+    # Load existing history
+    history = []
+    if history_path.exists():
+        try:
+            with open(history_path, 'r', encoding='utf-8') as f:
+                history = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            history = []
+
+    # Add new entry
+    history.append(data)
+
+    # Trim to max entries (keep most recent)
+    if len(history) > max_entries:
+        history = history[-max_entries:]
+
+    # Save
+    with open(history_path, 'w', encoding='utf-8') as f:
+        json.dump(history, f, ensure_ascii=False)
+
+    if verbose:
+        print(f"History saved ({len(history)} entries)")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="GPU/CPU Monitor Collector",
@@ -218,6 +251,8 @@ def main():
         print(json.dumps(data, indent=2, ensure_ascii=False))
     else:
         save_output(data, config.output_file, verbose=args.verbose)
+        # Also save to history
+        save_history(data, config.output_file, verbose=args.verbose)
 
 
 if __name__ == "__main__":

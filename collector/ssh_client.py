@@ -31,9 +31,11 @@ class CollectionResult:
 class SSHCollector:
     """SSH collector with support for both sync and async execution."""
 
-    def __init__(self, servers: List[ServerConfig], timeout: int = 30):
+    def __init__(self, servers: List[ServerConfig], timeout: int = 30, max_retries: int = 3):
         self.servers = servers
         self.timeout = timeout
+        self.max_retries = max_retries
+        self.retry_delay = 2  # seconds between retries
 
     def collect_all_sync(self) -> List[CollectionResult]:
         """
@@ -54,68 +56,82 @@ class SSHCollector:
         return results
 
     def _collect_sync(self, server: ServerConfig) -> CollectionResult:
-        """Collect data from a single server using paramiko."""
-        try:
-            ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        """Collect data from a single server using paramiko with retry logic."""
+        import time
+        last_error = None
 
-            connect_kwargs = {
-                'hostname': server.host,
-                'port': server.port,
-                'username': server.user,
-                'timeout': self.timeout,
-                'banner_timeout': self.timeout,
-                'allow_agent': False,
-                'look_for_keys': False,
-            }
+        for attempt in range(self.max_retries):
+            try:
+                ssh = paramiko.SSHClient()
+                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            if server.key_path:
-                connect_kwargs['key_filename'] = server.key_path
-                if server.key_passphrase:
-                    connect_kwargs['passphrase'] = server.key_passphrase
+                connect_kwargs = {
+                    'hostname': server.host,
+                    'port': server.port,
+                    'username': server.user,
+                    'timeout': self.timeout,
+                    'banner_timeout': self.timeout,
+                    'allow_agent': False,
+                    'look_for_keys': False,
+                }
 
-            ssh.connect(**connect_kwargs)
+                if server.key_path:
+                    connect_kwargs['key_filename'] = server.key_path
+                    if server.key_passphrase:
+                        connect_kwargs['passphrase'] = server.key_passphrase
 
-            # Execute combined command
-            stdin, stdout, stderr = ssh.exec_command(
-                COMBINED_COMMAND,
-                timeout=self.timeout
-            )
-            exit_status = stdout.channel.recv_exit_status()
-            output = stdout.read().decode('utf-8')
+                ssh.connect(**connect_kwargs)
 
-            ssh.close()
+                # Execute combined command
+                stdin, stdout, stderr = ssh.exec_command(
+                    COMBINED_COMMAND,
+                    timeout=self.timeout
+                )
+                exit_status = stdout.channel.recv_exit_status()
+                output = stdout.read().decode('utf-8')
 
-            if exit_status != 0:
+                ssh.close()
+
+                if exit_status != 0:
+                    last_error = f"Command failed with exit status {exit_status}"
+                    if attempt < self.max_retries - 1:
+                        time.sleep(self.retry_delay)
+                        continue
+                    return CollectionResult(
+                        server_name=server.name,
+                        host=server.host,
+                        success=False,
+                        sections={},
+                        error=last_error,
+                        collected_at=datetime.now(),
+                    )
+
+                # Parse output into sections
+                sections = parse_sections(output)
+
                 return CollectionResult(
                     server_name=server.name,
                     host=server.host,
-                    success=False,
-                    sections={},
-                    error=f"Command failed with exit status {exit_status}",
+                    success=True,
+                    sections=sections,
                     collected_at=datetime.now(),
                 )
 
-            # Parse output into sections
-            sections = parse_sections(output)
+            except Exception as e:
+                last_error = str(e)
+                if attempt < self.max_retries - 1:
+                    time.sleep(self.retry_delay)
+                    continue
 
-            return CollectionResult(
-                server_name=server.name,
-                host=server.host,
-                success=True,
-                sections=sections,
-                collected_at=datetime.now(),
-            )
-
-        except Exception as e:
-            return CollectionResult(
-                server_name=server.name,
-                host=server.host,
-                success=False,
-                sections={},
-                error=str(e),
-                collected_at=datetime.now(),
-            )
+        # All retries failed
+        return CollectionResult(
+            server_name=server.name,
+            host=server.host,
+            success=False,
+            sections={},
+            error=f"Failed after {self.max_retries} attempts: {last_error}",
+            collected_at=datetime.now(),
+        )
 
     async def collect_all_async(self) -> List[CollectionResult]:
         """

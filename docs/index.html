@@ -6,72 +6,152 @@
   <title>Research Server Monitor</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='10' y='20' width='80' height='60' rx='5' fill='%23161b22' stroke='%2358a6ff' stroke-width='4'/><rect x='20' y='35' width='25' height='8' rx='2' fill='%233fb950'/><rect x='20' y='50' width='35' height='8' rx='2' fill='%23f0883e'/><rect x='20' y='65' width='15' height='8' rx='2' fill='%23a371f7'/><circle cx='70' cy='50' r='12' fill='%2358a6ff'/></svg>">
   <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --border-color: #30363d;
+      --text-primary: #f0f6fc;
+      --text-secondary: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent-blue: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-orange: #f0883e;
+      --accent-red: #f85149;
+      --accent-purple: #a371f7;
+    }
+    [data-theme="light"] {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f6f8fa;
+      --bg-tertiary: #e6e9ec;
+      --border-color: #d0d7de;
+      --text-primary: #1f2328;
+      --text-secondary: #424a53;
+      --text-muted: #656d76;
+      --accent-blue: #0969da;
+      --accent-green: #1a7f37;
+      --accent-orange: #bf5000;
+      --accent-red: #cf222e;
+      --accent-purple: #8250df;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
-      background: #0d1117;
-      color: #c9d1d9;
+      background: var(--bg-primary);
+      color: var(--text-secondary);
       line-height: 1.5;
       min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
     }
     .header {
-      background: #161b22;
-      border-bottom: 1px solid #30363d;
-      padding: 16px 24px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
     }
-    .header h1 { font-size: 20px; font-weight: 600; color: #f0f6fc; }
-    .update-info { font-size: 13px; color: #8b949e; }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header h1 { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .update-info { font-size: 13px; color: var(--text-muted); }
+
+    .btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: var(--border-color); }
+    .btn-icon { font-size: 14px; }
+
     .main { padding: 24px; }
     .loading, .error { text-align: center; padding: 24px; font-size: 16px; }
-    .error { color: #f85149; }
+    .error { color: var(--accent-red); }
 
-    /* Two-column layout for all servers */
     .server-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 24px;
     }
     @media (max-width: 1200px) {
-      .server-grid {
-        grid-template-columns: 1fr;
-      }
+      .server-grid { grid-template-columns: 1fr; }
     }
 
     .server-card {
-      background: #161b22;
-      border: 1px solid #30363d;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       overflow: hidden;
+      transition: background 0.3s, border-color 0.3s;
     }
-    .server-card.offline { opacity: 0.7; }
+    .server-card.offline {
+      border-color: var(--accent-red);
+      box-shadow: 0 0 0 1px var(--accent-red);
+    }
     .server-header {
-      background: #21262d;
+      background: var(--bg-tertiary);
       padding: 12px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #30363d;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      user-select: none;
     }
-    .server-title { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-    .server-title h2 { font-size: 16px; font-weight: 600; color: #f0f6fc; }
-    .hostname { font-size: 13px; color: #8b949e; }
+    .server-header:hover { background: var(--border-color); }
+    .server-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .server-title h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .hostname { font-size: 13px; color: var(--text-muted); }
+    .collapse-icon {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+      margin-right: 8px;
+    }
+    .server-card.collapsed .collapse-icon { transform: rotate(-90deg); }
+    .server-card.collapsed .server-content { display: none; }
+    .header-right-section { display: flex; align-items: center; gap: 8px; }
     .status-badge {
       font-size: 12px;
       padding: 2px 8px;
       border-radius: 12px;
       font-weight: 500;
     }
-    .status-badge.online { background: rgba(35, 134, 54, 0.2); color: #3fb950; }
-    .status-badge.offline { background: rgba(248, 81, 73, 0.2); color: #f85149; }
+    .status-badge.online { background: rgba(35, 134, 54, 0.2); color: var(--accent-green); }
+    .status-badge.offline {
+      background: rgba(248, 81, 73, 0.3);
+      color: var(--accent-red);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .offline-banner {
+      background: rgba(248, 81, 73, 0.15);
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+      padding: 16px;
+      text-align: center;
+      font-weight: 500;
+    }
+    .offline-banner .error-msg { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
     .system-metrics {
       padding: 12px 16px;
-      border-bottom: 1px solid #30363d;
+      border-bottom: 1px solid var(--border-color);
     }
     .metrics-row {
       display: grid;
@@ -84,17 +164,17 @@
     .metric-label {
       font-size: 11px;
       font-weight: 600;
-      color: #8b949e;
+      color: var(--text-muted);
       text-transform: uppercase;
     }
-    .metric-value { font-size: 16px; font-weight: 600; color: #f0f6fc; }
-    .metric-value.low { color: #3fb950; }
-    .metric-value.medium { color: #f0883e; }
-    .metric-value.high { color: #f85149; }
-    .metric-detail { font-size: 11px; color: #8b949e; }
+    .metric-value { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .metric-value.low { color: var(--accent-green); }
+    .metric-value.medium { color: var(--accent-orange); }
+    .metric-value.high { color: var(--accent-red); }
+    .metric-detail { font-size: 11px; color: var(--text-muted); }
     .progress-bar {
       height: 4px;
-      background: #30363d;
+      background: var(--border-color);
       border-radius: 2px;
       overflow: hidden;
       margin-top: 4px;
@@ -104,7 +184,7 @@
     .disks-section {
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px solid #30363d;
+      border-top: 1px solid var(--border-color);
     }
     .disks-grid {
       display: grid;
@@ -112,54 +192,54 @@
       gap: 8px;
     }
     .disk-item {
-      background: #0d1117;
-      border: 1px solid #30363d;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
       border-radius: 4px;
       padding: 8px 10px;
     }
-    .disk-mount { font-size: 12px; font-weight: 600; color: #58a6ff; margin-bottom: 4px; }
-    .disk-device { font-size: 10px; color: #8b949e; margin-bottom: 4px; }
-    .disk-usage { font-size: 11px; color: #c9d1d9; }
+    .disk-mount { font-size: 12px; font-weight: 600; color: var(--accent-blue); margin-bottom: 4px; }
+    .disk-device { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+    .disk-usage { font-size: 11px; color: var(--text-secondary); }
 
     .gpu-section { padding: 12px 16px; }
     .section-title {
       font-size: 13px;
       font-weight: 600;
-      color: #8b949e;
+      color: var(--text-muted);
       margin-bottom: 12px;
       text-transform: uppercase;
     }
     .gpu-list { display: flex; flex-direction: column; gap: 8px; }
     .gpu-card {
-      background: #0d1117;
-      border: 1px solid #30363d;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
       border-radius: 6px;
       padding: 10px 12px;
     }
     .gpu-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-    .gpu-index { color: #58a6ff; font-weight: 600; }
-    .gpu-name { color: #a371f7; font-weight: 500; flex: 1; }
-    .driver-version { font-size: 11px; color: #8b949e; }
+    .gpu-index { color: var(--accent-blue); font-weight: 600; }
+    .gpu-name { color: var(--accent-purple); font-weight: 500; flex: 1; }
+    .driver-version { font-size: 11px; color: var(--text-muted); }
     .gpu-metrics { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
     .gpu-metric { display: flex; flex-direction: column; gap: 2px; }
     .gpu-metric.memory { flex: 1; min-width: 120px; }
-    .gpu-metric-label { font-size: 10px; color: #8b949e; text-transform: uppercase; }
-    .gpu-metric-value { font-size: 14px; font-weight: 600; }
+    .gpu-metric-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
+    .gpu-metric-value { font-size: 14px; font-weight: 600; color: var(--text-primary); }
 
-    .processes { margin-top: 8px; padding-top: 8px; border-top: 1px solid #30363d; display: flex; flex-wrap: wrap; gap: 8px; }
+    .processes { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color); display: flex; flex-wrap: wrap; gap: 8px; }
     .process { font-size: 12px; }
-    .process-user { color: #8b949e; }
-    .process-cmd { color: #58a6ff; }
-    .process-pid { color: #8b949e; }
-    .process-mem { color: #f0883e; }
+    .process-user { color: var(--text-muted); }
+    .process-cmd { color: var(--accent-blue); }
+    .process-pid { color: var(--text-muted); }
+    .process-mem { color: var(--accent-orange); }
 
     .footer {
-      background: #161b22;
-      border-top: 1px solid #30363d;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-color);
       padding: 12px 24px;
       text-align: center;
       font-size: 12px;
-      color: #8b949e;
+      color: var(--text-muted);
     }
 
     /* Mobile responsive styles */
@@ -168,16 +248,17 @@
         padding: 8px 12px;
         flex-direction: column;
         align-items: flex-start;
-        gap: 2px;
+        gap: 8px;
       }
+      .header-left { width: 100%; justify-content: space-between; }
       .header h1 { font-size: 16px; }
+      .header-right { width: 100%; justify-content: space-between; }
       .update-info { font-size: 10px; }
 
       .main { padding: 8px 0; }
       .loading, .error { padding: 16px; font-size: 14px; }
 
       .server-grid { gap: 8px; }
-
       .server-card { border-radius: 0; border-left: none; border-right: none; }
 
       .server-header {
@@ -189,6 +270,7 @@
       .server-title h2 { font-size: 14px; }
       .hostname { font-size: 11px; }
       .status-badge { font-size: 11px; }
+      .header-right-section { width: 100%; justify-content: space-between; }
 
       .system-metrics { padding: 8px 10px; }
       .metrics-row {
@@ -227,9 +309,10 @@
       .process { font-size: 10px; }
 
       .footer { padding: 6px 10px; font-size: 10px; }
+
+      .btn { padding: 4px 8px; font-size: 11px; }
     }
 
-    /* Extra small phones */
     @media (max-width: 360px) {
       .header { padding: 6px 10px; }
       .header h1 { font-size: 14px; }
@@ -246,8 +329,22 @@
 </head>
 <body>
   <header class="header">
-    <h1>Research Server Monitor</h1>
-    <div class="update-info" id="update-info">Loading...</div>
+    <div class="header-left">
+      <h1>Research Server Monitor</h1>
+      <button class="btn" onclick="location.href='history.html'" title="View History">
+        <span class="btn-icon">📊</span>
+        <span>History</span>
+      </button>
+    </div>
+    <div class="header-right">
+      <div class="update-info" id="update-info">Loading...</div>
+      <button class="btn" id="theme-toggle" title="Toggle Theme">
+        <span class="btn-icon" id="theme-icon">🌙</span>
+      </button>
+      <button class="btn" id="collapse-all" title="Collapse/Expand All">
+        <span class="btn-icon">📁</span>
+      </button>
+    </div>
   </header>
 
   <main class="main">
@@ -259,8 +356,42 @@
   </footer>
 
   <script>
-    const REFRESH_INTERVAL = 30000; // 30 seconds
+    const REFRESH_INTERVAL = 30000;
+    let allCollapsed = false;
 
+    // Theme management
+    function initTheme() {
+      const saved = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeIcon(saved);
+    }
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateThemeIcon(next);
+    }
+    function updateThemeIcon(theme) {
+      document.getElementById('theme-icon').textContent = theme === 'dark' ? '🌙' : '☀️';
+    }
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    initTheme();
+
+    // Collapse management
+    function toggleCollapse(serverId) {
+      const card = document.querySelector(`[data-server-id="${serverId}"]`);
+      if (card) card.classList.toggle('collapsed');
+    }
+    function toggleAllCollapse() {
+      allCollapsed = !allCollapsed;
+      document.querySelectorAll('.server-card').forEach(card => {
+        card.classList.toggle('collapsed', allCollapsed);
+      });
+    }
+    document.getElementById('collapse-all').addEventListener('click', toggleAllCollapse);
+
+    // Utility functions
     function formatBytes(bytes) {
       if (!bytes) return '0 B';
       const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -280,9 +411,10 @@
     }
 
     function getUsageColor(percent) {
-      if (percent >= 80) return '#f85149';
-      if (percent >= 50) return '#f0883e';
-      return '#3fb950';
+      const theme = document.documentElement.getAttribute('data-theme');
+      if (percent >= 80) return theme === 'light' ? '#cf222e' : '#f85149';
+      if (percent >= 50) return theme === 'light' ? '#bf5000' : '#f0883e';
+      return theme === 'light' ? '#1a7f37' : '#3fb950';
     }
 
     function getTempClass(temp) {
@@ -292,31 +424,44 @@
       return 'low';
     }
 
-    // Filter out virtual/snap devices, keep real disks
+    // Simplify GPU name
+    function simplifyGpuName(name) {
+      if (!name) return 'Unknown GPU';
+      // Remove common prefixes
+      name = name.replace(/^NVIDIA\s+/i, '');
+      // Shorten common names
+      name = name.replace(/GeForce\s+/i, '');
+      name = name.replace(/\s+Generation$/i, '');
+      name = name.replace(/\s+Laptop\s+GPU$/i, ' Mobile');
+      return name;
+    }
+
     function filterDisks(disks) {
       return (disks || []).filter(d => {
-        // Exclude loop devices (snap packages)
         if (d.device.startsWith('/dev/loop')) return false;
-        // Exclude snap mounts
         if (d.mount_point.includes('/snap/')) return false;
-        // Exclude boot/efi if small
         if (d.mount_point === '/boot/efi' && d.total_bytes < 2000000000) return false;
         return true;
       });
     }
 
-    function renderServer(server) {
+    function renderServer(server, index) {
       const isOnline = server.status === 'online';
+      const serverId = `server-${index}`;
 
       let html = `
-        <div class="server-card ${isOnline ? '' : 'offline'}">
-          <div class="server-header">
+        <div class="server-card ${isOnline ? '' : 'offline'}" data-server-id="${serverId}">
+          <div class="server-header" onclick="toggleCollapse('${serverId}')">
             <div class="server-title">
+              <span class="collapse-icon">▼</span>
               <h2>${server.name}</h2>
               <span class="hostname">(${server.hostname || server.host})</span>
             </div>
-            <span class="status-badge ${server.status}">${server.status}</span>
+            <div class="header-right-section">
+              <span class="status-badge ${server.status}">${server.status}</span>
+            </div>
           </div>
+          <div class="server-content">
       `;
 
       if (isOnline && server.system) {
@@ -373,13 +518,13 @@
                   <div class="gpu-card">
                     <div class="gpu-header">
                       <span class="gpu-index">[${gpu.index}]</span>
-                      <span class="gpu-name">${gpu.name}</span>
+                      <span class="gpu-name">${simplifyGpuName(gpu.name)}</span>
                       <span class="driver-version">${gpu.driver_version}</span>
                     </div>
                     <div class="gpu-metrics">
                       <div class="gpu-metric">
                         <span class="gpu-metric-label">Temp</span>
-                        <span class="gpu-metric-value ${getTempClass(gpu.temperature_celsius)}">${gpu.temperature_celsius}'C</span>
+                        <span class="gpu-metric-value ${getTempClass(gpu.temperature_celsius)}">${gpu.temperature_celsius}°C</span>
                       </div>
                       <div class="gpu-metric">
                         <span class="gpu-metric-label">GPU</span>
@@ -389,7 +534,7 @@
                         <span class="gpu-metric-label">VRAM</span>
                         <span class="gpu-metric-value">${formatMemory(gpu.memory.used_mb)} / ${formatMemory(gpu.memory.total_mb)}</span>
                         <div class="progress-bar">
-                          <div class="progress-fill" style="width: ${gpu.memory.usage_percent}%; background: #a371f7"></div>
+                          <div class="progress-fill" style="width: ${gpu.memory.usage_percent}%; background: var(--accent-purple)"></div>
                         </div>
                       </div>
                     </div>
@@ -409,24 +554,26 @@
           `;
         }
       } else if (!isOnline) {
-        html += `<div style="padding: 24px 16px; color: #f85149;">${server.error_message || 'Connection failed'}</div>`;
+        html += `
+          <div class="offline-banner">
+            <div>⚠️ Server Offline</div>
+            <div class="error-msg">${server.error_message || 'Connection failed'}</div>
+          </div>
+        `;
       }
 
-      html += '</div>';
+      html += '</div></div>';
       return html;
     }
 
     function sortServers(servers) {
-      // Sort: node0 first, then node1, then others
       return servers.sort((a, b) => {
         const aName = a.name.toLowerCase();
         const bName = b.name.toLowerCase();
-        // DDC nodes first
         const aIsDDC = aName.includes('ddc');
         const bIsDDC = bName.includes('ddc');
         if (aIsDDC && !bIsDDC) return -1;
         if (!aIsDDC && bIsDDC) return 1;
-        // node0 before node1
         const aNode = aName.match(/node\s*(\d+)/)?.[1] || '99';
         const bNode = bName.match(/node\s*(\d+)/)?.[1] || '99';
         return parseInt(aNode) - parseInt(bNode);
@@ -446,7 +593,7 @@
 
         if (data.servers && data.servers.length > 0) {
           const sorted = sortServers([...data.servers]);
-          const html = `<div class="server-grid">${sorted.map(renderServer).join('')}</div>`;
+          const html = `<div class="server-grid">${sorted.map((s, i) => renderServer(s, i)).join('')}</div>`;
           document.getElementById('content').innerHTML = html;
         } else {
           document.getElementById('content').innerHTML = '<div class="loading">No servers configured</div>';

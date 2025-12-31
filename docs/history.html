@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>History - Research Server Monitor</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='10' y='20' width='80' height='60' rx='5' fill='%23161b22' stroke='%2358a6ff' stroke-width='4'/><rect x='20' y='35' width='25' height='8' rx='2' fill='%233fb950'/><rect x='20' y='50' width='35' height='8' rx='2' fill='%23f0883e'/><rect x='20' y='65' width='15' height='8' rx='2' fill='%23a371f7'/><circle cx='70' cy='50' r='12' fill='%2358a6ff'/></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --border-color: #30363d;
+      --text-primary: #f0f6fc;
+      --text-secondary: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent-blue: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-orange: #f0883e;
+      --accent-red: #f85149;
+      --accent-purple: #a371f7;
+    }
+    [data-theme="light"] {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f6f8fa;
+      --bg-tertiary: #e6e9ec;
+      --border-color: #d0d7de;
+      --text-primary: #1f2328;
+      --text-secondary: #424a53;
+      --text-muted: #656d76;
+      --accent-blue: #0969da;
+      --accent-green: #1a7f37;
+      --accent-orange: #bf5000;
+      --accent-red: #cf222e;
+      --accent-purple: #8250df;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      line-height: 1.5;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header h1 { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+
+    .btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--border-color); }
+    .btn.active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+
+    .main { padding: 24px; }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .control-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    select {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 1200px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+
+    .chart-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .chart-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .chart-container {
+      position: relative;
+      height: 250px;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 48px;
+      color: var(--text-muted);
+    }
+
+    .footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-color);
+      padding: 12px 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 480px) {
+      .header { padding: 8px 12px; flex-direction: column; align-items: flex-start; gap: 8px; }
+      .header-left { width: 100%; justify-content: space-between; }
+      .header h1 { font-size: 16px; }
+      .main { padding: 12px; }
+      .controls { flex-direction: column; align-items: flex-start; }
+      .chart-card { padding: 12px; }
+      .chart-container { height: 200px; }
+      .btn { padding: 4px 8px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <h1>History</h1>
+      <a href="index.html" class="btn" title="Back to Dashboard">
+        <span>← Dashboard</span>
+      </a>
+    </div>
+    <div class="header-right">
+      <button class="btn" id="theme-toggle" title="Toggle Theme">
+        <span id="theme-icon">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="controls">
+      <div class="control-group">
+        <span class="control-label">Server:</span>
+        <select id="server-select"></select>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Time Range:</span>
+        <button class="btn active" data-range="1h">1H</button>
+        <button class="btn" data-range="6h">6H</button>
+        <button class="btn" data-range="24h">24H</button>
+        <button class="btn" data-range="7d">7D</button>
+      </div>
+    </div>
+
+    <div id="content">
+      <div class="no-data">Loading history data...</div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>NTUST HISLab 3DVis | Research Server Monitor</p>
+  </footer>
+
+  <script>
+    let historyData = [];
+    let selectedServer = '';
+    let selectedRange = '1h';
+    let charts = {};
+
+    // Theme management
+    function initTheme() {
+      const saved = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeIcon(saved);
+    }
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateThemeIcon(next);
+      updateChartColors();
+    }
+    function updateThemeIcon(theme) {
+      document.getElementById('theme-icon').textContent = theme === 'dark' ? '🌙' : '☀️';
+    }
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    initTheme();
+
+    // Range selection
+    document.querySelectorAll('[data-range]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-range]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedRange = btn.dataset.range;
+        renderCharts();
+      });
+    });
+
+    // Server selection
+    document.getElementById('server-select').addEventListener('change', (e) => {
+      selectedServer = e.target.value;
+      renderCharts();
+    });
+
+    function getChartColors() {
+      const theme = document.documentElement.getAttribute('data-theme');
+      return {
+        cpu: theme === 'light' ? '#0969da' : '#58a6ff',
+        memory: theme === 'light' ? '#1a7f37' : '#3fb950',
+        gpu: theme === 'light' ? '#8250df' : '#a371f7',
+        temp: theme === 'light' ? '#bf5000' : '#f0883e',
+        grid: theme === 'light' ? '#d0d7de' : '#30363d',
+        text: theme === 'light' ? '#656d76' : '#8b949e',
+      };
+    }
+
+    function filterDataByRange(data) {
+      const now = Date.now();
+      const ranges = {
+        '1h': 60 * 60 * 1000,
+        '6h': 6 * 60 * 60 * 1000,
+        '24h': 24 * 60 * 60 * 1000,
+        '7d': 7 * 24 * 60 * 60 * 1000,
+      };
+      const cutoff = now - (ranges[selectedRange] || ranges['1h']);
+      return data.filter(d => new Date(d.timestamp).getTime() > cutoff);
+    }
+
+    function getServerData(data, serverName) {
+      return data.map(snapshot => {
+        const server = snapshot.servers?.find(s => s.name === serverName);
+        return {
+          timestamp: snapshot.timestamp,
+          server: server
+        };
+      }).filter(d => d.server && d.server.status === 'online');
+    }
+
+    function createChart(ctx, label, data, color, yLabel, max = 100) {
+      const colors = getChartColors();
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [{
+            label: label,
+            data: data,
+            borderColor: color,
+            backgroundColor: color + '20',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            intersect: false,
+            mode: 'index',
+          },
+          scales: {
+            x: {
+              type: 'time',
+              time: {
+                displayFormats: {
+                  minute: 'HH:mm',
+                  hour: 'HH:mm',
+                  day: 'MM/dd'
+                }
+              },
+              grid: { color: colors.grid },
+              ticks: { color: colors.text, maxTicksLimit: 8 }
+            },
+            y: {
+              min: 0,
+              max: max,
+              grid: { color: colors.grid },
+              ticks: { color: colors.text },
+              title: {
+                display: true,
+                text: yLabel,
+                color: colors.text
+              }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+            }
+          }
+        }
+      });
+    }
+
+    function updateChartColors() {
+      const colors = getChartColors();
+      Object.values(charts).forEach(chart => {
+        if (chart) {
+          chart.options.scales.x.grid.color = colors.grid;
+          chart.options.scales.x.ticks.color = colors.text;
+          chart.options.scales.y.grid.color = colors.grid;
+          chart.options.scales.y.ticks.color = colors.text;
+          chart.options.scales.y.title.color = colors.text;
+          chart.update();
+        }
+      });
+    }
+
+    function renderCharts() {
+      const filtered = filterDataByRange(historyData);
+      const serverData = getServerData(filtered, selectedServer);
+
+      if (serverData.length === 0) {
+        document.getElementById('content').innerHTML = '<div class="no-data">No data available for the selected time range</div>';
+        return;
+      }
+
+      const colors = getChartColors();
+
+      // Prepare data
+      const cpuData = serverData.map(d => ({
+        x: new Date(d.timestamp),
+        y: d.server.system?.cpu?.usage_percent || 0
+      }));
+
+      const memData = serverData.map(d => ({
+        x: new Date(d.timestamp),
+        y: d.server.system?.memory?.usage_percent || 0
+      }));
+
+      // GPU data (first GPU)
+      const gpuUtilData = serverData.map(d => ({
+        x: new Date(d.timestamp),
+        y: d.server.gpus?.[0]?.utilization_percent || 0
+      }));
+
+      const gpuTempData = serverData.map(d => ({
+        x: new Date(d.timestamp),
+        y: d.server.gpus?.[0]?.temperature_celsius || 0
+      }));
+
+      const gpuMemData = serverData.map(d => ({
+        x: new Date(d.timestamp),
+        y: d.server.gpus?.[0]?.memory?.usage_percent || 0
+      }));
+
+      // Destroy existing charts
+      Object.values(charts).forEach(chart => chart?.destroy());
+      charts = {};
+
+      // Render
+      document.getElementById('content').innerHTML = `
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-title">CPU Usage</div>
+            <div class="chart-container"><canvas id="cpu-chart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Memory Usage</div>
+            <div class="chart-container"><canvas id="mem-chart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">GPU Utilization</div>
+            <div class="chart-container"><canvas id="gpu-util-chart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">GPU Temperature</div>
+            <div class="chart-container"><canvas id="gpu-temp-chart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">GPU Memory</div>
+            <div class="chart-container"><canvas id="gpu-mem-chart"></canvas></div>
+          </div>
+        </div>
+      `;
+
+      charts.cpu = createChart(
+        document.getElementById('cpu-chart').getContext('2d'),
+        'CPU', cpuData, colors.cpu, '%'
+      );
+      charts.mem = createChart(
+        document.getElementById('mem-chart').getContext('2d'),
+        'Memory', memData, colors.memory, '%'
+      );
+      charts.gpuUtil = createChart(
+        document.getElementById('gpu-util-chart').getContext('2d'),
+        'GPU', gpuUtilData, colors.gpu, '%'
+      );
+      charts.gpuTemp = createChart(
+        document.getElementById('gpu-temp-chart').getContext('2d'),
+        'Temp', gpuTempData, colors.temp, '°C', 100
+      );
+      charts.gpuMem = createChart(
+        document.getElementById('gpu-mem-chart').getContext('2d'),
+        'VRAM', gpuMemData, colors.gpu, '%'
+      );
+    }
+
+    async function loadHistory() {
+      try {
+        const res = await fetch(`data/history.json?t=${Date.now()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        historyData = await res.json();
+
+        // Populate server select
+        const servers = new Set();
+        historyData.forEach(snapshot => {
+          snapshot.servers?.forEach(s => servers.add(s.name));
+        });
+
+        const select = document.getElementById('server-select');
+        select.innerHTML = [...servers].map(name =>
+          `<option value="${name}">${name}</option>`
+        ).join('');
+
+        selectedServer = select.value;
+        renderCharts();
+      } catch (e) {
+        document.getElementById('content').innerHTML = `
+          <div class="no-data">
+            <p>No history data available yet.</p>
+            <p style="font-size: 12px; margin-top: 8px;">History data is collected automatically. Please wait for data to accumulate.</p>
+          </div>
+        `;
+      }
+    }
+
+    loadHistory();
+    // Refresh every 5 minutes
+    setInterval(loadHistory, 5 * 60 * 1000);
+  </script>
+</body>
+</html>
