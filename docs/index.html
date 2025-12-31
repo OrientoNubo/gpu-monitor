@@ -29,18 +29,14 @@
     .loading, .error { text-align: center; padding: 48px; font-size: 16px; }
     .error { color: #f85149; }
 
-    /* Two-column layout for DDC nodes */
+    /* Two-column layout for all servers */
     .server-grid {
-      display: grid;
-      gap: 24px;
-    }
-    .server-row {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 24px;
     }
     @media (max-width: 1200px) {
-      .server-row {
+      .server-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -368,26 +364,7 @@
 
         if (data.servers && data.servers.length > 0) {
           const sorted = sortServers([...data.servers]);
-
-          // Separate DDC nodes and others
-          const ddcNodes = sorted.filter(s => s.name.toLowerCase().includes('ddc'));
-          const otherNodes = sorted.filter(s => !s.name.toLowerCase().includes('ddc'));
-
-          let html = '<div class="server-grid">';
-
-          // DDC nodes in two-column layout
-          if (ddcNodes.length >= 2) {
-            html += `<div class="server-row">${ddcNodes.map(renderServer).join('')}</div>`;
-          } else if (ddcNodes.length === 1) {
-            html += renderServer(ddcNodes[0]);
-          }
-
-          // Other nodes in single column
-          otherNodes.forEach(s => {
-            html += renderServer(s);
-          });
-
-          html += '</div>';
+          const html = `<div class="server-grid">${sorted.map(renderServer).join('')}</div>`;
           document.getElementById('content').innerHTML = html;
         } else {
           document.getElementById('content').innerHTML = '<div class="loading">No servers configured</div>';
