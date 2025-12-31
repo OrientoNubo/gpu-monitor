@@ -164,7 +164,7 @@
     /* Mobile responsive styles */
     @media (max-width: 480px) {
       .header {
-        padding: 8px 10px;
+        padding: 8px 12px;
         flex-direction: column;
         align-items: flex-start;
         gap: 2px;
@@ -172,12 +172,14 @@
       .header h1 { font-size: 16px; }
       .update-info { font-size: 10px; }
 
-      .main { padding: 6px; }
+      .main { padding: 0; }
 
-      .server-grid { gap: 6px; }
+      .server-grid { gap: 1px; }
+
+      .server-card { border-radius: 0; border-left: none; border-right: none; }
 
       .server-header {
-        padding: 8px 10px;
+        padding: 8px 12px;
         flex-direction: column;
         align-items: flex-start;
         gap: 4px;
@@ -227,13 +229,11 @@
 
     /* Extra small phones */
     @media (max-width: 360px) {
-      .header { padding: 6px 8px; }
+      .header { padding: 6px 10px; }
       .header h1 { font-size: 14px; }
-      .main { padding: 4px; }
-      .server-grid { gap: 4px; }
-      .server-header { padding: 6px 8px; }
-      .system-metrics { padding: 6px 8px; }
-      .gpu-section { padding: 6px 8px; }
+      .server-header { padding: 6px 10px; }
+      .system-metrics { padding: 6px 10px; }
+      .gpu-section { padding: 6px 10px; }
       .gpu-metrics {
         flex-direction: column;
         gap: 8px;
