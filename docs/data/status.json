@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-12-31T22:26:03.288437+08:00",
+  "timestamp": "2025-12-31T22:27:02.784719+08:00",
   "collector_version": "2.0.0",
   "servers": [
     {
@@ -7,7 +7,7 @@
       "host": "140.118.234.7",
       "status": "online",
       "error_message": null,
-      "collected_at": "2025-12-31T22:26:02.779882",
+      "collected_at": "2025-12-31T22:27:01.984772",
       "hostname": "ddc-384-node1",
       "system": {
         "cpu": {
@@ -16,17 +16,17 @@
         },
         "memory": {
           "total_bytes": 540322783232,
-          "available_bytes": 360864354304,
-          "used_bytes": 179458428928,
-          "usage_percent": 33.2
+          "available_bytes": 352635346944,
+          "used_bytes": 187687436288,
+          "usage_percent": 34.7
         },
         "disks": [
           {
             "device": "/dev/nvme0n1p2",
             "mount_point": "/",
             "total_bytes": 2014574526464,
-            "used_bytes": 214352035840,
-            "available_bytes": 1697812217856,
+            "used_bytes": 214352044032,
+            "available_bytes": 1697812209664,
             "usage_percent": 10.6
           },
           {
@@ -58,15 +58,22 @@
           "index": 1,
           "name": "NVIDIA RTX 6000 Ada Generation",
           "uuid": "GPU-c7d75bef-e795-0715-3f30-34b5d6f817dc",
-          "temperature_celsius": 33,
+          "temperature_celsius": 40,
           "utilization_percent": 0,
           "memory": {
-            "used_mb": 18,
+            "used_mb": 16515,
             "total_mb": 49140,
-            "usage_percent": 0.0
+            "usage_percent": 33.6
           },
           "driver_version": "580.95.05",
-          "processes": []
+          "processes": [
+            {
+              "pid": 3549199,
+              "user": "cyan",
+              "command": "test_grape_modu",
+              "gpu_memory_mb": 16492
+            }
+          ]
         },
         {
           "index": 2,
@@ -103,7 +110,7 @@
       "host": "140.118.234.35",
       "status": "online",
       "error_message": null,
-      "collected_at": "2025-12-31T22:26:02.905659",
+      "collected_at": "2025-12-31T22:27:02.100783",
       "hostname": "ddc-384-node0",
       "system": {
         "cpu": {
@@ -112,8 +119,8 @@
         },
         "memory": {
           "total_bytes": 269897707520,
-          "available_bytes": 252336529408,
-          "used_bytes": 17561178112,
+          "available_bytes": 252342636544,
+          "used_bytes": 17555070976,
           "usage_percent": 6.5
         },
         "disks": [
@@ -121,8 +128,8 @@
             "device": "/dev/nvme0n1p2",
             "mount_point": "/",
             "total_bytes": 2014574526464,
-            "used_bytes": 841700569088,
-            "available_bytes": 1070463684608,
+            "used_bytes": 841700605952,
+            "available_bytes": 1070463647744,
             "usage_percent": 41.8
           },
           {
@@ -335,7 +342,7 @@
       "host": "140.118.234.12",
       "status": "online",
       "error_message": null,
-      "collected_at": "2025-12-31T22:26:03.286564",
+      "collected_at": "2025-12-31T22:27:02.783003",
       "hostname": "esc4000-e11-h100",
       "system": {
         "cpu": {
@@ -344,8 +351,8 @@
         },
         "memory": {
           "total_bytes": 1081864241152,
-          "available_bytes": 749367312384,
-          "used_bytes": 332496928768,
+          "available_bytes": 750164836352,
+          "used_bytes": 331699404800,
           "usage_percent": 30.7
         },
         "disks": [
@@ -380,7 +387,7 @@
           "index": 0,
           "name": "NVIDIA H100 NVL",
           "uuid": "GPU-d5ead21a-83f7-0d8a-5abb-19502d92a97b",
-          "temperature_celsius": 27,
+          "temperature_celsius": 26,
           "utilization_percent": 0,
           "memory": {
             "used_mb": 0,
@@ -394,8 +401,8 @@
           "index": 1,
           "name": "NVIDIA H100 NVL",
           "uuid": "GPU-22d5173b-1924-a40d-e2bd-1f8e476c6f77",
-          "temperature_celsius": 66,
-          "utilization_percent": 99,
+          "temperature_celsius": 67,
+          "utilization_percent": 100,
           "memory": {
             "used_mb": 46095,
             "total_mb": 95830,
