@@ -106,31 +106,88 @@
       cursor: pointer;
     }
 
-    .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-    }
-    @media (max-width: 1200px) {
-      .charts-grid { grid-template-columns: 1fr; }
-    }
-
-    .chart-card {
+    .gpu-section {
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      padding: 16px;
+      margin-bottom: 24px;
+      overflow: hidden;
     }
-    .chart-title {
+    .gpu-section-header {
+      background: var(--bg-tertiary);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .gpu-section-title {
       font-size: 14px;
       font-weight: 600;
       color: var(--text-primary);
-      margin-bottom: 12px;
+    }
+    .gpu-section-title .gpu-name { color: var(--accent-purple); }
+    .gpu-section-content { padding: 16px; }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 1200px) {
+      .charts-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .charts-row { grid-template-columns: 1fr; }
+    }
+
+    .chart-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+    }
+    .chart-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
     }
     .chart-container {
       position: relative;
-      height: 250px;
+      height: 180px;
     }
+
+    .process-history {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+    .process-history-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .process-timeline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .process-entry {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 11px;
+    }
+    .process-time { color: var(--text-muted); }
+    .process-user { color: var(--accent-blue); font-weight: 500; }
+    .process-cmd { color: var(--text-secondary); }
+    .process-mem { color: var(--accent-orange); }
 
     .no-data {
       text-align: center;
@@ -153,8 +210,9 @@
       .header h1 { font-size: 16px; }
       .main { padding: 12px; }
       .controls { flex-direction: column; align-items: flex-start; }
-      .chart-card { padding: 12px; }
-      .chart-container { height: 200px; }
+      .gpu-section-content { padding: 12px; }
+      .chart-card { padding: 8px; }
+      .chart-container { height: 150px; }
       .btn { padding: 4px 8px; font-size: 11px; }
     }
   </style>
@@ -162,7 +220,7 @@
 <body>
   <header class="header">
     <div class="header-left">
-      <h1>History</h1>
+      <h1>GPU History</h1>
       <a href="index.html" class="btn" title="Back to Dashboard">
         <span>← Dashboard</span>
       </a>
@@ -216,7 +274,7 @@
       document.documentElement.setAttribute('data-theme', next);
       localStorage.setItem('theme', next);
       updateThemeIcon(next);
-      updateChartColors();
+      renderCharts();
     }
     function updateThemeIcon(theme) {
       document.getElementById('theme-icon').textContent = theme === 'dark' ? '🌙' : '☀️';
@@ -243,10 +301,9 @@
     function getChartColors() {
       const theme = document.documentElement.getAttribute('data-theme');
       return {
-        cpu: theme === 'light' ? '#0969da' : '#58a6ff',
-        memory: theme === 'light' ? '#1a7f37' : '#3fb950',
-        gpu: theme === 'light' ? '#8250df' : '#a371f7',
+        util: theme === 'light' ? '#8250df' : '#a371f7',
         temp: theme === 'light' ? '#bf5000' : '#f0883e',
+        mem: theme === 'light' ? '#0969da' : '#58a6ff',
         grid: theme === 'light' ? '#d0d7de' : '#30363d',
         text: theme === 'light' ? '#656d76' : '#8b949e',
       };
@@ -272,6 +329,14 @@
           server: server
         };
       }).filter(d => d.server && d.server.status === 'online');
+    }
+
+    function simplifyGpuName(name) {
+      if (!name) return 'Unknown GPU';
+      name = name.replace(/^NVIDIA\s+/i, '');
+      name = name.replace(/GeForce\s+/i, '');
+      name = name.replace(/\s+Generation$/i, '');
+      return name;
     }
 
     function createChart(ctx, label, data, color, yLabel, max = 100) {
@@ -308,7 +373,7 @@
                 }
               },
               grid: { color: colors.grid },
-              ticks: { color: colors.text, maxTicksLimit: 8 }
+              ticks: { color: colors.text, maxTicksLimit: 6 }
             },
             y: {
               min: 0,
@@ -318,7 +383,8 @@
               title: {
                 display: true,
                 text: yLabel,
-                color: colors.text
+                color: colors.text,
+                font: { size: 10 }
               }
             }
           },
@@ -334,21 +400,46 @@
       });
     }
 
-    function updateChartColors() {
-      const colors = getChartColors();
-      Object.values(charts).forEach(chart => {
-        if (chart) {
-          chart.options.scales.x.grid.color = colors.grid;
-          chart.options.scales.x.ticks.color = colors.text;
-          chart.options.scales.y.grid.color = colors.grid;
-          chart.options.scales.y.ticks.color = colors.text;
-          chart.options.scales.y.title.color = colors.text;
-          chart.update();
+    function getProcessHistory(serverData, gpuIndex) {
+      // Get unique process entries with timestamps
+      const processMap = new Map();
+
+      serverData.forEach(d => {
+        const gpu = d.server.gpus?.[gpuIndex];
+        if (gpu?.processes) {
+          gpu.processes.forEach(p => {
+            const key = `${p.user}:${p.command}`;
+            if (!processMap.has(key)) {
+              processMap.set(key, {
+                user: p.user,
+                command: p.command,
+                firstSeen: d.timestamp,
+                lastSeen: d.timestamp,
+                maxMem: p.gpu_memory_mb
+              });
+            } else {
+              const entry = processMap.get(key);
+              entry.lastSeen = d.timestamp;
+              entry.maxMem = Math.max(entry.maxMem, p.gpu_memory_mb);
+            }
+          });
         }
       });
+
+      return Array.from(processMap.values())
+        .sort((a, b) => new Date(b.lastSeen) - new Date(a.lastSeen))
+        .slice(0, 10); // Show last 10 unique processes
+    }
+
+    function formatTime(timestamp) {
+      return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
     function renderCharts() {
+      // Destroy existing charts
+      Object.values(charts).forEach(chart => chart?.destroy());
+      charts = {};
+
       const filtered = filterDataByRange(historyData);
       const serverData = getServerData(filtered, selectedServer);
 
@@ -357,85 +448,116 @@
         return;
       }
 
+      // Get GPU count from most recent data
+      const latestServer = serverData[serverData.length - 1].server;
+      const gpuCount = latestServer.gpus?.length || 0;
+
+      if (gpuCount === 0) {
+        document.getElementById('content').innerHTML = '<div class="no-data">No GPU data available</div>';
+        return;
+      }
+
       const colors = getChartColors();
+      let html = '';
 
-      // Prepare data
-      const cpuData = serverData.map(d => ({
-        x: new Date(d.timestamp),
-        y: d.server.system?.cpu?.usage_percent || 0
-      }));
+      // Create section for each GPU
+      for (let gpuIdx = 0; gpuIdx < gpuCount; gpuIdx++) {
+        const gpuInfo = latestServer.gpus[gpuIdx];
+        const gpuName = simplifyGpuName(gpuInfo.name);
 
-      const memData = serverData.map(d => ({
-        x: new Date(d.timestamp),
-        y: d.server.system?.memory?.usage_percent || 0
-      }));
+        // Prepare data for this GPU
+        const utilData = serverData.map(d => ({
+          x: new Date(d.timestamp),
+          y: d.server.gpus?.[gpuIdx]?.utilization_percent || 0
+        }));
 
-      // GPU data (first GPU)
-      const gpuUtilData = serverData.map(d => ({
-        x: new Date(d.timestamp),
-        y: d.server.gpus?.[0]?.utilization_percent || 0
-      }));
+        const tempData = serverData.map(d => ({
+          x: new Date(d.timestamp),
+          y: d.server.gpus?.[gpuIdx]?.temperature_celsius || 0
+        }));
 
-      const gpuTempData = serverData.map(d => ({
-        x: new Date(d.timestamp),
-        y: d.server.gpus?.[0]?.temperature_celsius || 0
-      }));
+        const memData = serverData.map(d => ({
+          x: new Date(d.timestamp),
+          y: d.server.gpus?.[gpuIdx]?.memory?.usage_percent || 0
+        }));
 
-      const gpuMemData = serverData.map(d => ({
-        x: new Date(d.timestamp),
-        y: d.server.gpus?.[0]?.memory?.usage_percent || 0
-      }));
+        const processHistory = getProcessHistory(serverData, gpuIdx);
 
-      // Destroy existing charts
-      Object.values(charts).forEach(chart => chart?.destroy());
-      charts = {};
-
-      // Render
-      document.getElementById('content').innerHTML = `
-        <div class="charts-grid">
-          <div class="chart-card">
-            <div class="chart-title">CPU Usage</div>
-            <div class="chart-container"><canvas id="cpu-chart"></canvas></div>
+        html += `
+          <div class="gpu-section">
+            <div class="gpu-section-header">
+              <div class="gpu-section-title">
+                <span>[${gpuIdx}]</span>
+                <span class="gpu-name">${gpuName}</span>
+              </div>
+            </div>
+            <div class="gpu-section-content">
+              <div class="charts-row">
+                <div class="chart-card">
+                  <div class="chart-title">GPU Utilization</div>
+                  <div class="chart-container"><canvas id="gpu-util-${gpuIdx}"></canvas></div>
+                </div>
+                <div class="chart-card">
+                  <div class="chart-title">Temperature</div>
+                  <div class="chart-container"><canvas id="gpu-temp-${gpuIdx}"></canvas></div>
+                </div>
+                <div class="chart-card">
+                  <div class="chart-title">VRAM Usage</div>
+                  <div class="chart-container"><canvas id="gpu-mem-${gpuIdx}"></canvas></div>
+                </div>
+              </div>
+              ${processHistory.length > 0 ? `
+                <div class="process-history">
+                  <div class="process-history-title">Recent Processes</div>
+                  <div class="process-timeline">
+                    ${processHistory.map(p => `
+                      <div class="process-entry">
+                        <span class="process-time">${formatTime(p.firstSeen)} - ${formatTime(p.lastSeen)}</span>
+                        <span class="process-user">${p.user}</span>
+                        <span class="process-cmd">${p.command}</span>
+                        <span class="process-mem">(${p.maxMem}M)</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
           </div>
-          <div class="chart-card">
-            <div class="chart-title">Memory Usage</div>
-            <div class="chart-container"><canvas id="mem-chart"></canvas></div>
-          </div>
-          <div class="chart-card">
-            <div class="chart-title">GPU Utilization</div>
-            <div class="chart-container"><canvas id="gpu-util-chart"></canvas></div>
-          </div>
-          <div class="chart-card">
-            <div class="chart-title">GPU Temperature</div>
-            <div class="chart-container"><canvas id="gpu-temp-chart"></canvas></div>
-          </div>
-          <div class="chart-card">
-            <div class="chart-title">GPU Memory</div>
-            <div class="chart-container"><canvas id="gpu-mem-chart"></canvas></div>
-          </div>
-        </div>
-      `;
+        `;
+      }
 
-      charts.cpu = createChart(
-        document.getElementById('cpu-chart').getContext('2d'),
-        'CPU', cpuData, colors.cpu, '%'
-      );
-      charts.mem = createChart(
-        document.getElementById('mem-chart').getContext('2d'),
-        'Memory', memData, colors.memory, '%'
-      );
-      charts.gpuUtil = createChart(
-        document.getElementById('gpu-util-chart').getContext('2d'),
-        'GPU', gpuUtilData, colors.gpu, '%'
-      );
-      charts.gpuTemp = createChart(
-        document.getElementById('gpu-temp-chart').getContext('2d'),
-        'Temp', gpuTempData, colors.temp, '°C', 100
-      );
-      charts.gpuMem = createChart(
-        document.getElementById('gpu-mem-chart').getContext('2d'),
-        'VRAM', gpuMemData, colors.gpu, '%'
-      );
+      document.getElementById('content').innerHTML = html;
+
+      // Create charts for each GPU
+      for (let gpuIdx = 0; gpuIdx < gpuCount; gpuIdx++) {
+        const utilData = serverData.map(d => ({
+          x: new Date(d.timestamp),
+          y: d.server.gpus?.[gpuIdx]?.utilization_percent || 0
+        }));
+
+        const tempData = serverData.map(d => ({
+          x: new Date(d.timestamp),
+          y: d.server.gpus?.[gpuIdx]?.temperature_celsius || 0
+        }));
+
+        const memData = serverData.map(d => ({
+          x: new Date(d.timestamp),
+          y: d.server.gpus?.[gpuIdx]?.memory?.usage_percent || 0
+        }));
+
+        charts[`util-${gpuIdx}`] = createChart(
+          document.getElementById(`gpu-util-${gpuIdx}`).getContext('2d'),
+          'Utilization', utilData, colors.util, '%'
+        );
+        charts[`temp-${gpuIdx}`] = createChart(
+          document.getElementById(`gpu-temp-${gpuIdx}`).getContext('2d'),
+          'Temperature', tempData, colors.temp, '°C', 100
+        );
+        charts[`mem-${gpuIdx}`] = createChart(
+          document.getElementById(`gpu-mem-${gpuIdx}`).getContext('2d'),
+          'VRAM', memData, colors.mem, '%'
+        );
+      }
     }
 
     async function loadHistory() {

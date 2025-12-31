@@ -121,6 +121,7 @@
     }
     .server-card.collapsed .collapse-icon { transform: rotate(-90deg); }
     .server-card.collapsed .server-content { display: none; }
+    .server-card.collapsed .server-header { border-bottom: none; }
     .header-right-section { display: flex; align-items: center; gap: 8px; }
     .status-badge {
       font-size: 12px;
@@ -358,6 +359,7 @@
   <script>
     const REFRESH_INTERVAL = 30000;
     let allCollapsed = false;
+    const collapsedServers = new Set(); // Track collapsed state by server name
 
     // Theme management
     function initTheme() {
@@ -378,14 +380,25 @@
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     initTheme();
 
-    // Collapse management
-    function toggleCollapse(serverId) {
-      const card = document.querySelector(`[data-server-id="${serverId}"]`);
-      if (card) card.classList.toggle('collapsed');
+    // Collapse management - track by server name to persist across refreshes
+    function toggleCollapse(serverName) {
+      if (collapsedServers.has(serverName)) {
+        collapsedServers.delete(serverName);
+      } else {
+        collapsedServers.add(serverName);
+      }
+      const card = document.querySelector(`[data-server-name="${serverName}"]`);
+      if (card) card.classList.toggle('collapsed', collapsedServers.has(serverName));
     }
     function toggleAllCollapse() {
       allCollapsed = !allCollapsed;
       document.querySelectorAll('.server-card').forEach(card => {
+        const serverName = card.dataset.serverName;
+        if (allCollapsed) {
+          collapsedServers.add(serverName);
+        } else {
+          collapsedServers.delete(serverName);
+        }
         card.classList.toggle('collapsed', allCollapsed);
       });
     }
@@ -447,11 +460,12 @@
 
     function renderServer(server, index) {
       const isOnline = server.status === 'online';
-      const serverId = `server-${index}`;
+      const serverName = server.name;
+      const isCollapsed = collapsedServers.has(serverName);
 
       let html = `
-        <div class="server-card ${isOnline ? '' : 'offline'}" data-server-id="${serverId}">
-          <div class="server-header" onclick="toggleCollapse('${serverId}')">
+        <div class="server-card ${isOnline ? '' : 'offline'} ${isCollapsed ? 'collapsed' : ''}" data-server-name="${serverName}">
+          <div class="server-header" onclick="toggleCollapse('${serverName.replace(/'/g, "\\'")}')">
             <div class="server-title">
               <span class="collapse-icon">▼</span>
               <h2>${server.name}</h2>
