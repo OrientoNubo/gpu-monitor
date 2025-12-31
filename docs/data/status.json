@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-12-31T22:09:02.534059+08:00",
+  "timestamp": "2025-12-31T22:10:03.011463+08:00",
   "collector_version": "2.0.0",
   "servers": [
     {
@@ -7,7 +7,7 @@
       "host": "140.118.234.7",
       "status": "online",
       "error_message": null,
-      "collected_at": "2025-12-31T22:09:02.105522",
+      "collected_at": "2025-12-31T22:10:02.195529",
       "hostname": "ddc-384-node1",
       "system": {
         "cpu": {
@@ -16,17 +16,17 @@
         },
         "memory": {
           "total_bytes": 540322783232,
-          "available_bytes": 356708216832,
-          "used_bytes": 183614566400,
-          "usage_percent": 34.0
+          "available_bytes": 352708222976,
+          "used_bytes": 187614560256,
+          "usage_percent": 34.7
         },
         "disks": [
           {
             "device": "/dev/nvme0n1p2",
             "mount_point": "/",
             "total_bytes": 2014574526464,
-            "used_bytes": 214218104832,
-            "available_bytes": 1697946148864,
+            "used_bytes": 214225043456,
+            "available_bytes": 1697939210240,
             "usage_percent": 10.6
           },
           {
@@ -61,9 +61,9 @@
           "temperature_celsius": 39,
           "utilization_percent": 0,
           "memory": {
-            "used_mb": 12895,
+            "used_mb": 28521,
             "total_mb": 49140,
-            "usage_percent": 26.2
+            "usage_percent": 58.0
           },
           "driver_version": "580.95.05",
           "processes": [
@@ -71,7 +71,7 @@
               "pid": 3539738,
               "user": "cyan",
               "command": "test_grape_modu",
-              "gpu_memory_mb": 12872
+              "gpu_memory_mb": 28498
             }
           ]
         },
@@ -110,7 +110,7 @@
       "host": "140.118.234.35",
       "status": "online",
       "error_message": null,
-      "collected_at": "2025-12-31T22:09:02.202201",
+      "collected_at": "2025-12-31T22:10:02.299312",
       "hostname": "ddc-384-node0",
       "system": {
         "cpu": {
@@ -119,8 +119,8 @@
         },
         "memory": {
           "total_bytes": 269897707520,
-          "available_bytes": 252319240192,
-          "used_bytes": 17578467328,
+          "available_bytes": 252327022592,
+          "used_bytes": 17570684928,
           "usage_percent": 6.5
         },
         "disks": [
@@ -128,8 +128,8 @@
             "device": "/dev/nvme0n1p2",
             "mount_point": "/",
             "total_bytes": 2014574526464,
-            "used_bytes": 841700134912,
-            "available_bytes": 1070464118784,
+            "used_bytes": 841700151296,
+            "available_bytes": 1070464102400,
             "usage_percent": 41.8
           },
           {
@@ -342,7 +342,7 @@
       "host": "140.118.234.12",
       "status": "online",
       "error_message": null,
-      "collected_at": "2025-12-31T22:09:02.532147",
+      "collected_at": "2025-12-31T22:10:03.009651",
       "hostname": "esc4000-e11-h100",
       "system": {
         "cpu": {
@@ -351,17 +351,17 @@
         },
         "memory": {
           "total_bytes": 1081864241152,
-          "available_bytes": 750508859392,
-          "used_bytes": 331355381760,
-          "usage_percent": 30.6
+          "available_bytes": 745329786880,
+          "used_bytes": 336534454272,
+          "usage_percent": 31.1
         },
         "disks": [
           {
             "device": "/dev/sdb2",
             "mount_point": "/",
             "total_bytes": 942328844288,
-            "used_bytes": 217287544832,
-            "available_bytes": 677098151936,
+            "used_bytes": 217287557120,
+            "available_bytes": 677098139648,
             "usage_percent": 23.1
           },
           {
@@ -401,8 +401,8 @@
           "index": 1,
           "name": "NVIDIA H100 NVL",
           "uuid": "GPU-22d5173b-1924-a40d-e2bd-1f8e476c6f77",
-          "temperature_celsius": 69,
-          "utilization_percent": 100,
+          "temperature_celsius": 53,
+          "utilization_percent": 0,
           "memory": {
             "used_mb": 46095,
             "total_mb": 95830,
