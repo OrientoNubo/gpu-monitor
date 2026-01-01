@@ -1,24 +1,38 @@
 # Research Server Monitor
 
-NTUST HISLab 3DVis 實驗室伺服器監控系統，通過 SSH 收集多台伺服器的 GPU、CPU、記憶體、磁碟使用狀況，並通過 GitHub Pages 提供公網訪問。
+A server monitoring system for NTUST HISLab, tracking GPU, CPU, memory, and disk usage via SSH. Hosted on GitHub Pages for public access.
 
-**線上訪問**: https://orientonubo.github.io/gpu-monitor/
+**Live Demo**: https://orientonubo.github.io/gpu-monitor/
 
-## 功能特性
+[中文版](README_CN.md)
 
-- **GPU 監控**: 溫度、使用率、顯存、運行中的進程
-- **系統監控**: CPU 使用率、記憶體用量、磁碟空間
-- **多伺服器**: 同時監控多台伺服器，並行 SSH 收集
-- **自動更新**: 每分鐘自動收集數據並推送到 GitHub
-- **響應式設計**: 支持桌面端和手機端瀏覽
-- **公網訪問**: 通過 GitHub Pages 托管，無需校內網
+## Features
 
-## 架構
+### Monitoring
+- **GPU Monitoring**: Temperature, utilization, VRAM, running processes
+- **System Monitoring**: CPU usage, memory usage, disk space
+- **Multi-Server**: Monitor multiple servers with parallel SSH collection
+- **Auto Update**: Collect and push data to GitHub every minute
+- **Retry Logic**: Auto-retry SSH connections up to 3 times on failure
+
+### Frontend
+- **Dark/Light Theme**: One-click toggle with preference persistence
+- **Collapse/Expand**: Click server header to collapse details
+- **History Charts**: View CPU/Memory/Disk and per-GPU trends
+- **Process History**: Display GPU process records over time
+- **Responsive Design**: Desktop and mobile friendly
+- **Offline Alert**: Prominent display when servers are offline
+
+### Deployment
+- **Public Access**: Hosted on GitHub Pages, no VPN needed
+- **Auto Deploy**: Website updates automatically on push
+
+## Architecture
 
 ```
 ┌─────────────────┐     SSH      ┌─────────────────┐
 │  Research       │◄────────────►│  Collector      │
-│  Servers        │   (並行)      │  (本機 cron)     │
+│  Servers        │  (parallel)  │  (local cron)   │
 │  - DDC node0    │              │                 │
 │  - DDC node1    │              │  python -m      │
 │  - ASUS H100    │              │  collector.main │
@@ -27,59 +41,62 @@ NTUST HISLab 3DVis 實驗室伺服器監控系統，通過 SSH 收集多台伺�
                                           ▼
                                  ┌─────────────────┐
                                  │  GitHub Pages   │
-                                 │  (公網訪問)      │
+                                 │  (public)       │
                                  │                 │
                                  │  status.json    │
                                  │  index.html     │
                                  └─────────────────┘
 ```
 
-## 目錄結構
+## Directory Structure
 
 ```
 .
-├── collector/              # Python 數據收集模組
+├── collector/              # Python data collection module
 │   ├── __init__.py
-│   ├── main.py            # 入口點
-│   ├── config.py          # 配置載入
-│   ├── ssh_client.py      # SSH 並行收集
-│   ├── commands.py        # Shell 命令定義
-│   ├── requirements.txt   # Python 依賴
-│   └── parsers/           # 數據解析器
+│   ├── main.py            # Entry point
+│   ├── config.py          # Configuration loader
+│   ├── ssh_client.py      # Parallel SSH collection
+│   ├── commands.py        # Shell command definitions
+│   ├── requirements.txt   # Python dependencies
+│   └── parsers/           # Data parsers
 │       ├── cpu.py
 │       ├── memory.py
 │       ├── disk.py
 │       ├── gpu.py
 │       └── process.py
 │
-├── docs/                   # GitHub Pages 網站
-│   ├── index.html         # 前端頁面
+├── docs/                   # GitHub Pages website
+│   ├── index.html         # Main page (live monitoring)
+│   ├── history.html       # History charts page
 │   └── data/
-│       └── status.json    # 監控數據
+│       ├── status.json    # Live monitoring data
+│       └── history.json   # Historical data (7-day rolling)
 │
 ├── scripts/
-│   └── cron_collect.sh    # Cron 定時任務腳本
+│   └── cron_collect.sh    # Cron job script
 │
-├── logs/                   # 日誌目錄
+├── logs/                   # Log directory
 │   └── cron.log
 │
 ├── .github/workflows/
-│   └── static.yml         # GitHub Pages 部署
+│   └── static.yml         # GitHub Pages deployment
 │
-├── servers.example.json   # 伺服器配置範例
-└── README.md
+├── servers.example.json   # Server configuration example
+├── README.md              # English documentation
+└── README_CN.md           # Chinese documentation
 ```
 
-## 安裝與配置
+## Installation & Configuration
 
-### 1. 克隆專案
+### 1. Clone the Repository
 
 ```bash
 git clone git@github.com:OrientoNubo/gpu-monitor.git
 cd gpu-monitor
 ```
 
-### 2. 創建 Python 虛擬環境
+### 2. Create Python Virtual Environment
 
 ```bash
 python3 -m venv venv
@@ -87,16 +104,16 @@ source venv/bin/activate
 pip install -r collector/requirements.txt
 ```
 
-### 3. 配置伺服器列表
+### 3. Configure Server List
 
-創建配置文件（**不要提交到 Git**）：
+Create config file (**do NOT commit to Git**):
 
 ```bash
 mkdir -p ~/.config/gpu-monitor
 cp servers.example.json ~/.config/gpu-monitor/servers.json
 ```
 
-編輯 `~/.config/gpu-monitor/servers.json`：
+Edit `~/.config/gpu-monitor/servers.json`:
 
 ```json
 {
@@ -126,64 +143,64 @@ cp servers.example.json ~/.config/gpu-monitor/servers.json
 }
 ```
 
-### 4. 配置 SSH 認證
+### 4. Configure SSH Authentication
 
-**方式一：SSH 密鑰（推薦）**
+**Option 1: SSH Key (Recommended)**
 
 ```bash
-# 生成密鑰（如果還沒有）
+# Generate key (if not exists)
 ssh-keygen -t ed25519
 
-# 複製公鑰到目標伺服器
+# Copy public key to target server
 ssh-copy-id -i ~/.ssh/id_ed25519.pub user@server
 ```
 
-**方式二：密碼認證**
+**Option 2: Password Authentication**
 
-在配置中使用 `password_env` 指定環境變量名稱，然後設置環境變量：
+Use `password_env` in config to specify environment variable name:
 
 ```bash
 export SSH_PASSWORD="your_password"
 ```
 
-### 5. 測試收集
+### 5. Test Collection
 
 ```bash
 source venv/bin/activate
 python -m collector.main --verbose
 ```
 
-成功後會在 `docs/data/status.json` 生成數據。
+On success, data will be generated at `docs/data/status.json`.
 
-### 6. 配置 Cron 定時任務
+### 6. Configure Cron Job
 
 ```bash
-# 編輯 crontab
+# Edit crontab
 crontab -e
 
-# 添加以下行（每分鐘執行一次）
-* * * * * SSH_KEY_PASSPHRASE="your_passphrase" /home/nubo/workspace/GPU_status_monitor_ssh/scripts/cron_collect.sh >> /home/nubo/workspace/GPU_status_monitor_ssh/logs/cron.log 2>&1
+# Add following line (runs every minute)
+* * * * * SSH_KEY_PASSPHRASE="your_passphrase" /path/to/scripts/cron_collect.sh >> /path/to/logs/cron.log 2>&1
 ```
 
-**注意**: 修改路徑為你的實際路徑。
+**Note**: Replace paths with your actual paths.
 
-### 7. 啟用 GitHub Pages
+### 7. Enable GitHub Pages
 
-1. 進入 GitHub 倉庫 Settings → Pages
-2. Source 選擇 "GitHub Actions"
-3. 等待部署完成
+1. Go to GitHub repo Settings → Pages
+2. Source: select "GitHub Actions"
+3. Wait for deployment
 
-## 環境變量
+## Environment Variables
 
-| 變量名 | 說明 |
-|--------|------|
-| `SSH_KEY_PASSPHRASE` | SSH 私鑰密碼（如果有） |
-| `SSH_PASSWORD` | SSH 密碼（如果使用密碼認證） |
-| `GPU_MONITOR_CONFIG` | 自定義配置文件路徑（可選） |
+| Variable | Description |
+|----------|-------------|
+| `SSH_KEY_PASSPHRASE` | SSH private key passphrase (if any) |
+| `SSH_PASSWORD` | SSH password (if using password auth) |
+| `GPU_MONITOR_CONFIG` | Custom config file path (optional) |
 
-## 手動操作
+## Manual Operations
 
-### 手動收集數據
+### Manual Data Collection
 
 ```bash
 cd /path/to/gpu-monitor
@@ -191,7 +208,7 @@ source venv/bin/activate
 python -m collector.main --verbose
 ```
 
-### 手動推送到 GitHub
+### Manual Push to GitHub
 
 ```bash
 git add docs/data/
@@ -199,21 +216,21 @@ git commit -m "Manual update"
 git push
 ```
 
-### 查看 Cron 日誌
+### View Cron Logs
 
 ```bash
 tail -f logs/cron.log
 ```
 
-### 查看當前 Cron 任務
+### List Current Cron Jobs
 
 ```bash
 crontab -l
 ```
 
-## 數據格式
+## Data Format
 
-`docs/data/status.json` 結構：
+`docs/data/status.json` structure:
 
 ```json
 {
@@ -232,15 +249,7 @@ crontab -l
           "used_bytes": 165695700992,
           "usage_percent": 30.7
         },
-        "disks": [
-          {
-            "device": "/dev/nvme0n1p2",
-            "mount_point": "/",
-            "total_bytes": 2014574526464,
-            "used_bytes": 212569665536,
-            "usage_percent": 10.6
-          }
-        ]
+        "disks": [...]
       },
       "gpus": [
         {
@@ -248,11 +257,7 @@ crontab -l
           "name": "NVIDIA RTX 6000 Ada Generation",
           "temperature_celsius": 40,
           "utilization_percent": 0,
-          "memory": {
-            "used_mb": 15,
-            "total_mb": 49140,
-            "usage_percent": 0.0
-          },
+          "memory": { "used_mb": 15, "total_mb": 49140, "usage_percent": 0.0 },
           "driver_version": "580.95.05",
           "processes": []
         }
@@ -262,38 +267,52 @@ crontab -l
 }
 ```
 
-## 故障排除
+## Troubleshooting
 
-### Cron 不執行
+### Cron Not Running
 
-1. 檢查 cron 服務狀態：`systemctl status cron`
-2. 檢查 cron 日誌：`grep CRON /var/log/syslog`
-3. 確保腳本有執行權限：`chmod +x scripts/cron_collect.sh`
+1. Check cron service: `systemctl status cron`
+2. Check cron logs: `grep CRON /var/log/syslog`
+3. Ensure script is executable: `chmod +x scripts/cron_collect.sh`
 
-### SSH 連接失敗
+### SSH Connection Failed
 
-1. 手動測試 SSH：`ssh user@server`
-2. 檢查密鑰權限：`chmod 600 ~/.ssh/id_ed25519`
-3. 確保 `known_hosts` 已添加目標伺服器
+1. Test SSH manually: `ssh user@server`
+2. Check key permissions: `chmod 600 ~/.ssh/id_ed25519`
+3. Ensure target server is in `known_hosts`
 
-### GitHub Push 失敗
+### GitHub Push Failed
 
-1. 確保 SSH 密鑰已添加到 GitHub
-2. 檢查倉庫寫入權限
-3. 查看錯誤日誌：`tail logs/cron.log`
+1. Ensure SSH key is added to GitHub
+2. Check repository write permissions
+3. View error logs: `tail logs/cron.log`
 
-### 頁面不更新
+### Page Not Updating
 
-1. 檢查 GitHub Actions 是否成功
-2. 強制刷新瀏覽器：Ctrl+Shift+R
-3. 檢查 `docs/data/status.json` 時間戳
+1. Check GitHub Actions status
+2. Hard refresh browser: Ctrl+Shift+R
+3. Check `docs/data/status.json` timestamp
 
-## 技術棧
+## Tech Stack
 
-- **後端**: Python 3, Paramiko (SSH), Pexpect
-- **前端**: 純 HTML/CSS/JavaScript（無框架）
-- **部署**: GitHub Pages + GitHub Actions
-- **定時任務**: Linux Cron
+- **Backend**: Python 3, Paramiko (SSH), Pexpect
+- **Frontend**: Pure HTML/CSS/JavaScript, Chart.js
+- **Deployment**: GitHub Pages + GitHub Actions
+- **Scheduling**: Linux Cron
+
+## Page Preview
+
+### Main Page
+- Two-column layout for all servers
+- Real-time CPU/Memory/Disk and GPU status
+- Click header to collapse/expand details
+- Theme toggle in top-right corner
+
+### History Page
+- Select server and time range (1H/6H/24H/7D)
+- System Metrics: CPU, Memory, Disk trend charts
+- Per-GPU: Utilization, Temperature, VRAM charts
+- Process history within selected time range
 
 ## License
 
