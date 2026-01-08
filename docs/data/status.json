@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-09T07:38:03.192502+08:00",
+  "timestamp": "2026-01-09T07:39:02.879175+08:00",
   "collector_version": "2.0.0",
   "servers": [
     {
@@ -7,7 +7,7 @@
       "host": "140.118.234.7",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-09T07:38:02.527047",
+      "collected_at": "2026-01-09T07:39:02.693767",
       "hostname": "ddc-384-node1",
       "system": {
         "cpu": {
@@ -16,8 +16,8 @@
         },
         "memory": {
           "total_bytes": 540322783232,
-          "available_bytes": 337275731968,
-          "used_bytes": 203047051264,
+          "available_bytes": 337099653120,
+          "used_bytes": 203223130112,
           "usage_percent": 37.6
         },
         "disks": [
@@ -25,8 +25,8 @@
             "device": "/dev/nvme0n1p2",
             "mount_point": "/",
             "total_bytes": 2014574526464,
-            "used_bytes": 212678660096,
-            "available_bytes": 1699485593600,
+            "used_bytes": 212678664192,
+            "available_bytes": 1699485589504,
             "usage_percent": 10.6
           },
           {
@@ -45,7 +45,7 @@
           "name": "NVIDIA RTX 6000 Ada Generation",
           "uuid": "GPU-9eaf81ae-fccb-48da-c1a9-6fd6943a4dcd",
           "temperature_celsius": 87,
-          "utilization_percent": 98,
+          "utilization_percent": 100,
           "memory": {
             "used_mb": 40281,
             "total_mb": 49140,
@@ -65,8 +65,8 @@
           "index": 1,
           "name": "NVIDIA RTX 6000 Ada Generation",
           "uuid": "GPU-c7d75bef-e795-0715-3f30-34b5d6f817dc",
-          "temperature_celsius": 84,
-          "utilization_percent": 100,
+          "temperature_celsius": 83,
+          "utilization_percent": 99,
           "memory": {
             "used_mb": 39517,
             "total_mb": 49140,
@@ -86,8 +86,8 @@
           "index": 2,
           "name": "NVIDIA RTX 6000 Ada Generation",
           "uuid": "GPU-799aee11-2283-1af6-39d2-ee8955eb2304",
-          "temperature_celsius": 84,
-          "utilization_percent": 92,
+          "temperature_celsius": 87,
+          "utilization_percent": 100,
           "memory": {
             "used_mb": 39759,
             "total_mb": 49140,
@@ -107,8 +107,8 @@
           "index": 3,
           "name": "NVIDIA RTX 6000 Ada Generation",
           "uuid": "GPU-78b91962-e4f2-e7ee-ba2f-270b95a4338f",
-          "temperature_celsius": 83,
-          "utilization_percent": 98,
+          "temperature_celsius": 82,
+          "utilization_percent": 100,
           "memory": {
             "used_mb": 39613,
             "total_mb": 49140,
@@ -131,7 +131,7 @@
       "host": "140.118.234.35",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-09T07:38:02.628294",
+      "collected_at": "2026-01-09T07:39:02.791610",
       "hostname": "ddc-384-node0",
       "system": {
         "cpu": {
@@ -140,8 +140,8 @@
         },
         "memory": {
           "total_bytes": 269897707520,
-          "available_bytes": 200572485632,
-          "used_bytes": 69325221888,
+          "available_bytes": 200455352320,
+          "used_bytes": 69442355200,
           "usage_percent": 25.7
         },
         "disks": [
@@ -149,8 +149,8 @@
             "device": "/dev/nvme0n1p2",
             "mount_point": "/",
             "total_bytes": 2014574526464,
-            "used_bytes": 998528204800,
-            "available_bytes": 913636048896,
+            "used_bytes": 998528245760,
+            "available_bytes": 913636007936,
             "usage_percent": 49.6
           },
           {
@@ -304,7 +304,7 @@
           "index": 0,
           "name": "NVIDIA RTX 6000 Ada Generation",
           "uuid": "GPU-237fd9eb-566d-7a98-eeb6-aceaf417c86a",
-          "temperature_celsius": 88,
+          "temperature_celsius": 86,
           "utilization_percent": 100,
           "memory": {
             "used_mb": 39543,
@@ -325,7 +325,7 @@
           "index": 1,
           "name": "NVIDIA RTX 6000 Ada Generation",
           "uuid": "GPU-24c009cc-db94-b5fc-be8c-1e363ec2a30d",
-          "temperature_celsius": 83,
+          "temperature_celsius": 81,
           "utilization_percent": 100,
           "memory": {
             "used_mb": 39741,
@@ -346,8 +346,8 @@
           "index": 2,
           "name": "NVIDIA RTX 6000 Ada Generation",
           "uuid": "GPU-cb30d94b-46f0-ed39-2a3e-ca91e0ab26c2",
-          "temperature_celsius": 85,
-          "utilization_percent": 100,
+          "temperature_celsius": 84,
+          "utilization_percent": 99,
           "memory": {
             "used_mb": 40085,
             "total_mb": 49140,
@@ -367,12 +367,12 @@
           "index": 3,
           "name": "NVIDIA RTX 6000 Ada Generation",
           "uuid": "GPU-67ac6828-cfe8-53b2-0e9a-f20ecf91d524",
-          "temperature_celsius": 88,
+          "temperature_celsius": 87,
           "utilization_percent": 100,
           "memory": {
-            "used_mb": 40265,
+            "used_mb": 40385,
             "total_mb": 49140,
-            "usage_percent": 81.9
+            "usage_percent": 82.2
           },
           "driver_version": "570.133.07",
           "processes": [
@@ -380,7 +380,7 @@
               "pid": 1415922,
               "user": "cyan",
               "command": "python3",
-              "gpu_memory_mb": 40210
+              "gpu_memory_mb": 40330
             }
           ]
         }
@@ -391,7 +391,7 @@
       "host": "140.118.234.12",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-09T07:38:03.190742",
+      "collected_at": "2026-01-09T07:39:02.877248",
       "hostname": "esc4000-e11-h100",
       "system": {
         "cpu": {
@@ -400,9 +400,9 @@
         },
         "memory": {
           "total_bytes": 1081864241152,
-          "available_bytes": 938601742336,
-          "used_bytes": 143262498816,
-          "usage_percent": 13.2
+          "available_bytes": 938345422848,
+          "used_bytes": 143518818304,
+          "usage_percent": 13.3
         },
         "disks": [
           {
@@ -436,8 +436,8 @@
           "index": 0,
           "name": "NVIDIA H100 NVL",
           "uuid": "GPU-d5ead21a-83f7-0d8a-5abb-19502d92a97b",
-          "temperature_celsius": 57,
-          "utilization_percent": 100,
+          "temperature_celsius": 62,
+          "utilization_percent": 99,
           "memory": {
             "used_mb": 71555,
             "total_mb": 95830,
@@ -457,8 +457,8 @@
           "index": 1,
           "name": "NVIDIA H100 NVL",
           "uuid": "GPU-22d5173b-1924-a40d-e2bd-1f8e476c6f77",
-          "temperature_celsius": 64,
-          "utilization_percent": 100,
+          "temperature_celsius": 66,
+          "utilization_percent": 96,
           "memory": {
             "used_mb": 62597,
             "total_mb": 95830,
