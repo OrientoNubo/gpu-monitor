@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-13T20:45:07.038759+08:00",
+  "timestamp": "2026-01-13T20:46:28.050392+08:00",
   "collector_version": "2.0.0",
   "servers": [
     {
@@ -7,7 +7,7 @@
       "host": "140.118.234.7",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-13T20:45:01.984988",
+      "collected_at": "2026-01-13T20:46:02.546762",
       "hostname": "ddc-384-node1",
       "system": {
         "cpu": {
@@ -16,9 +16,9 @@
         },
         "memory": {
           "total_bytes": 540322783232,
-          "available_bytes": 456118923264,
-          "used_bytes": 84203859968,
-          "usage_percent": 15.6
+          "available_bytes": 450005204992,
+          "used_bytes": 90317578240,
+          "usage_percent": 16.7
         },
         "disks": [
           {
@@ -58,12 +58,12 @@
           "index": 1,
           "name": "NVIDIA RTX 6000 Ada Generation",
           "uuid": "GPU-c7d75bef-e795-0715-3f30-34b5d6f817dc",
-          "temperature_celsius": 55,
+          "temperature_celsius": 61,
           "utilization_percent": 98,
           "memory": {
-            "used_mb": 41957,
+            "used_mb": 20483,
             "total_mb": 49140,
-            "usage_percent": 85.4
+            "usage_percent": 41.7
           },
           "driver_version": "580.95.05",
           "processes": [
@@ -71,7 +71,7 @@
               "pid": 152861,
               "user": "cyan",
               "command": "python3",
-              "gpu_memory_mb": 41932
+              "gpu_memory_mb": 20458
             }
           ]
         },
@@ -79,7 +79,7 @@
           "index": 2,
           "name": "NVIDIA RTX 6000 Ada Generation",
           "uuid": "GPU-799aee11-2283-1af6-39d2-ee8955eb2304",
-          "temperature_celsius": 37,
+          "temperature_celsius": 38,
           "utilization_percent": 0,
           "memory": {
             "used_mb": 18,
@@ -110,7 +110,7 @@
       "host": "140.118.234.12",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-13T20:45:04.680292",
+      "collected_at": "2026-01-13T20:46:02.662106",
       "hostname": "esc4000-e11-h100",
       "system": {
         "cpu": {
@@ -119,8 +119,8 @@
         },
         "memory": {
           "total_bytes": 1081864241152,
-          "available_bytes": 974431305728,
-          "used_bytes": 107432935424,
+          "available_bytes": 974422224896,
+          "used_bytes": 107442016256,
           "usage_percent": 9.9
         },
         "disks": [
@@ -169,8 +169,8 @@
           "index": 1,
           "name": "NVIDIA H100 NVL",
           "uuid": "GPU-22d5173b-1924-a40d-e2bd-1f8e476c6f77",
-          "temperature_celsius": 61,
-          "utilization_percent": 100,
+          "temperature_celsius": 62,
+          "utilization_percent": 87,
           "memory": {
             "used_mb": 62597,
             "total_mb": 95830,
@@ -193,7 +193,7 @@
       "host": "140.118.234.35",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-13T20:45:07.036615",
+      "collected_at": "2026-01-13T20:46:28.048553",
       "hostname": "ddc-384-node0",
       "system": {
         "cpu": {
@@ -202,17 +202,17 @@
         },
         "memory": {
           "total_bytes": 269897707520,
-          "available_bytes": 23647682560,
-          "used_bytes": 246250024960,
-          "usage_percent": 91.2
+          "available_bytes": 23293095936,
+          "used_bytes": 246604611584,
+          "usage_percent": 91.4
         },
         "disks": [
           {
             "device": "/dev/nvme0n1p2",
             "mount_point": "/",
             "total_bytes": 2014574526464,
-            "used_bytes": 1107071307776,
-            "available_bytes": 805092945920,
+            "used_bytes": 1107071463424,
+            "available_bytes": 805092790272,
             "usage_percent": 55.0
           },
           {
@@ -315,8 +315,8 @@
             "device": "/dev/mapper/vgpool-vg3dv",
             "mount_point": "/home/3dv_25/shared/hdd_vg",
             "total_bytes": 80000202047488,
-            "used_bytes": 67973821779968,
-            "available_bytes": 12026380267520,
+            "used_bytes": 67975577329664,
+            "available_bytes": 12024624717824,
             "usage_percent": 85.0
           },
           {
