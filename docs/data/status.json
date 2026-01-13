@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-14T06:02:06.174954+08:00",
+  "timestamp": "2026-01-14T06:03:12.330149+08:00",
   "collector_version": "2.0.0",
   "servers": [
     {
@@ -7,7 +7,7 @@
       "host": "140.118.234.7",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-14T06:02:01.997675",
+      "collected_at": "2026-01-14T06:03:02.636909",
       "hostname": "ddc-384-node1",
       "system": {
         "cpu": {
@@ -16,8 +16,8 @@
         },
         "memory": {
           "total_bytes": 540322783232,
-          "available_bytes": 472756989952,
-          "used_bytes": 67565793280,
+          "available_bytes": 472756375552,
+          "used_bytes": 67566407680,
           "usage_percent": 12.5
         },
         "disks": [
@@ -103,7 +103,7 @@
       "host": "140.118.234.12",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-14T06:02:02.565439",
+      "collected_at": "2026-01-14T06:03:03.351382",
       "hostname": "esc4000-e11-h100",
       "system": {
         "cpu": {
@@ -112,8 +112,8 @@
         },
         "memory": {
           "total_bytes": 1081864241152,
-          "available_bytes": 974009622528,
-          "used_bytes": 107854618624,
+          "available_bytes": 974104444928,
+          "used_bytes": 107759796224,
           "usage_percent": 10.0
         },
         "disks": [
@@ -121,8 +121,8 @@
             "device": "/dev/sdb2",
             "mount_point": "/",
             "total_bytes": 942328844288,
-            "used_bytes": 272385810432,
-            "available_bytes": 621999886336,
+            "used_bytes": 272385814528,
+            "available_bytes": 621999882240,
             "usage_percent": 28.9
           },
           {
@@ -162,7 +162,7 @@
           "index": 1,
           "name": "NVIDIA H100 NVL",
           "uuid": "GPU-22d5173b-1924-a40d-e2bd-1f8e476c6f77",
-          "temperature_celsius": 61,
+          "temperature_celsius": 62,
           "utilization_percent": 100,
           "memory": {
             "used_mb": 62597,
@@ -186,7 +186,7 @@
       "host": "140.118.234.35",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-14T06:02:06.172988",
+      "collected_at": "2026-01-14T06:03:12.328312",
       "hostname": "ddc-384-node0",
       "system": {
         "cpu": {
@@ -195,17 +195,17 @@
         },
         "memory": {
           "total_bytes": 269897707520,
-          "available_bytes": 107610365952,
-          "used_bytes": 162287341568,
-          "usage_percent": 60.1
+          "available_bytes": 151514505216,
+          "used_bytes": 118383202304,
+          "usage_percent": 43.9
         },
         "disks": [
           {
             "device": "/dev/nvme0n1p2",
             "mount_point": "/",
             "total_bytes": 2014574526464,
-            "used_bytes": 1114564694016,
-            "available_bytes": 797599559680,
+            "used_bytes": 1114564837376,
+            "available_bytes": 797599416320,
             "usage_percent": 55.3
           },
           {
@@ -308,8 +308,8 @@
             "device": "/dev/mapper/vgpool-vg3dv",
             "mount_point": "/home/3dv_25/shared/hdd_vg",
             "total_bytes": 80000202047488,
-            "used_bytes": 69023436288000,
-            "available_bytes": 10976765759488,
+            "used_bytes": 69024544284672,
+            "available_bytes": 10975657762816,
             "usage_percent": 86.3
           },
           {
@@ -362,61 +362,40 @@
           "temperature_celsius": 42,
           "utilization_percent": 0,
           "memory": {
-            "used_mb": 13433,
+            "used_mb": 43,
             "total_mb": 49140,
-            "usage_percent": 27.3
+            "usage_percent": 0.1
           },
           "driver_version": "570.133.07",
-          "processes": [
-            {
-              "pid": 3151406,
-              "user": "jastin",
-              "command": "python3.11",
-              "gpu_memory_mb": 13382
-            }
-          ]
+          "processes": []
         },
         {
           "index": 1,
           "name": "NVIDIA RTX 6000 Ada Generation",
           "uuid": "GPU-24c009cc-db94-b5fc-be8c-1e363ec2a30d",
-          "temperature_celsius": 39,
+          "temperature_celsius": 42,
           "utilization_percent": 0,
           "memory": {
-            "used_mb": 13707,
+            "used_mb": 43,
             "total_mb": 49140,
-            "usage_percent": 27.9
+            "usage_percent": 0.1
           },
           "driver_version": "570.133.07",
-          "processes": [
-            {
-              "pid": 3151407,
-              "user": "jastin",
-              "command": "python3.11",
-              "gpu_memory_mb": 13654
-            }
-          ]
+          "processes": []
         },
         {
           "index": 2,
           "name": "NVIDIA RTX 6000 Ada Generation",
           "uuid": "GPU-cb30d94b-46f0-ed39-2a3e-ca91e0ab26c2",
-          "temperature_celsius": 38,
+          "temperature_celsius": 37,
           "utilization_percent": 0,
           "memory": {
-            "used_mb": 13433,
+            "used_mb": 43,
             "total_mb": 49140,
-            "usage_percent": 27.3
+            "usage_percent": 0.1
           },
           "driver_version": "570.133.07",
-          "processes": [
-            {
-              "pid": 3151408,
-              "user": "jastin",
-              "command": "python3.11",
-              "gpu_memory_mb": 13382
-            }
-          ]
+          "processes": []
         },
         {
           "index": 3,
@@ -425,19 +404,12 @@
           "temperature_celsius": 45,
           "utilization_percent": 0,
           "memory": {
-            "used_mb": 13433,
+            "used_mb": 43,
             "total_mb": 49140,
-            "usage_percent": 27.3
+            "usage_percent": 0.1
           },
           "driver_version": "570.133.07",
-          "processes": [
-            {
-              "pid": 3151409,
-              "user": "jastin",
-              "command": "python3.11",
-              "gpu_memory_mb": 13382
-            }
-          ]
+          "processes": []
         }
       ]
     }
