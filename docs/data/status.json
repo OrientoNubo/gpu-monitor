@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-14T04:14:10.423984+08:00",
+  "timestamp": "2026-01-14T04:15:09.512450+08:00",
   "collector_version": "2.0.0",
   "servers": [
     {
@@ -7,7 +7,7 @@
       "host": "140.118.234.7",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-14T04:14:01.853328",
+      "collected_at": "2026-01-14T04:15:02.513620",
       "hostname": "ddc-384-node1",
       "system": {
         "cpu": {
@@ -16,8 +16,8 @@
         },
         "memory": {
           "total_bytes": 540322783232,
-          "available_bytes": 472765943808,
-          "used_bytes": 67556839424,
+          "available_bytes": 472751603712,
+          "used_bytes": 67571179520,
           "usage_percent": 12.5
         },
         "disks": [
@@ -103,7 +103,7 @@
       "host": "140.118.234.12",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-14T04:14:02.177375",
+      "collected_at": "2026-01-14T04:15:03.148524",
       "hostname": "esc4000-e11-h100",
       "system": {
         "cpu": {
@@ -112,8 +112,8 @@
         },
         "memory": {
           "total_bytes": 1081864241152,
-          "available_bytes": 973850972160,
-          "used_bytes": 108013268992,
+          "available_bytes": 973878001664,
+          "used_bytes": 107986239488,
           "usage_percent": 10.0
         },
         "disks": [
@@ -148,7 +148,7 @@
           "index": 0,
           "name": "NVIDIA H100 NVL",
           "uuid": "GPU-d5ead21a-83f7-0d8a-5abb-19502d92a97b",
-          "temperature_celsius": 25,
+          "temperature_celsius": 24,
           "utilization_percent": 0,
           "memory": {
             "used_mb": 0,
@@ -162,8 +162,8 @@
           "index": 1,
           "name": "NVIDIA H100 NVL",
           "uuid": "GPU-22d5173b-1924-a40d-e2bd-1f8e476c6f77",
-          "temperature_celsius": 61,
-          "utilization_percent": 100,
+          "temperature_celsius": 59,
+          "utilization_percent": 88,
           "memory": {
             "used_mb": 62597,
             "total_mb": 95830,
@@ -186,7 +186,7 @@
       "host": "140.118.234.35",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-14T04:14:10.422063",
+      "collected_at": "2026-01-14T04:15:09.510512",
       "hostname": "ddc-384-node0",
       "system": {
         "cpu": {
@@ -195,17 +195,17 @@
         },
         "memory": {
           "total_bytes": 269897707520,
-          "available_bytes": 75658764288,
-          "used_bytes": 194238943232,
-          "usage_percent": 72.0
+          "available_bytes": 89928830976,
+          "used_bytes": 179968876544,
+          "usage_percent": 66.7
         },
         "disks": [
           {
             "device": "/dev/nvme0n1p2",
             "mount_point": "/",
             "total_bytes": 2014574526464,
-            "used_bytes": 1109489127424,
-            "available_bytes": 802675126272,
+            "used_bytes": 1109489369088,
+            "available_bytes": 802674884608,
             "usage_percent": 55.1
           },
           {
@@ -308,8 +308,8 @@
             "device": "/dev/mapper/vgpool-vg3dv",
             "mount_point": "/home/3dv_25/shared/hdd_vg",
             "total_bytes": 80000202047488,
-            "used_bytes": 68777688682496,
-            "available_bytes": 11222513364992,
+            "used_bytes": 68780441083904,
+            "available_bytes": 11219760963584,
             "usage_percent": 86.0
           },
           {
@@ -362,37 +362,12 @@
           "temperature_celsius": 37,
           "utilization_percent": 0,
           "memory": {
-            "used_mb": 39093,
+            "used_mb": 43,
             "total_mb": 49140,
-            "usage_percent": 79.6
+            "usage_percent": 0.1
           },
           "driver_version": "570.133.07",
-          "processes": [
-            {
-              "pid": 2966170,
-              "user": "kuma",
-              "command": "python3.10",
-              "gpu_memory_mb": 904
-            },
-            {
-              "pid": 2966172,
-              "user": "kuma",
-              "command": "python3.10",
-              "gpu_memory_mb": 904
-            },
-            {
-              "pid": 2966171,
-              "user": "kuma",
-              "command": "python3.10",
-              "gpu_memory_mb": 904
-            },
-            {
-              "pid": 2966169,
-              "user": "kuma",
-              "command": "python3.10",
-              "gpu_memory_mb": 36312
-            }
-          ]
+          "processes": []
         },
         {
           "index": 1,
@@ -401,19 +376,12 @@
           "temperature_celsius": 32,
           "utilization_percent": 0,
           "memory": {
-            "used_mb": 36363,
+            "used_mb": 43,
             "total_mb": 49140,
-            "usage_percent": 74.0
+            "usage_percent": 0.1
           },
           "driver_version": "570.133.07",
-          "processes": [
-            {
-              "pid": 2966170,
-              "user": "kuma",
-              "command": "python3.10",
-              "gpu_memory_mb": 36312
-            }
-          ]
+          "processes": []
         },
         {
           "index": 2,
@@ -422,19 +390,12 @@
           "temperature_celsius": 33,
           "utilization_percent": 0,
           "memory": {
-            "used_mb": 36363,
+            "used_mb": 43,
             "total_mb": 49140,
-            "usage_percent": 74.0
+            "usage_percent": 0.1
           },
           "driver_version": "570.133.07",
-          "processes": [
-            {
-              "pid": 2966171,
-              "user": "kuma",
-              "command": "python3.10",
-              "gpu_memory_mb": 36312
-            }
-          ]
+          "processes": []
         },
         {
           "index": 3,
@@ -443,19 +404,12 @@
           "temperature_celsius": 41,
           "utilization_percent": 0,
           "memory": {
-            "used_mb": 36363,
+            "used_mb": 43,
             "total_mb": 49140,
-            "usage_percent": 74.0
+            "usage_percent": 0.1
           },
           "driver_version": "570.133.07",
-          "processes": [
-            {
-              "pid": 2966172,
-              "user": "kuma",
-              "command": "python3.10",
-              "gpu_memory_mb": 36312
-            }
-          ]
+          "processes": []
         }
       ]
     }
