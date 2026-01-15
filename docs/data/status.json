@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-16T07:50:09.759945+08:00",
+  "timestamp": "2026-01-16T07:51:08.485915+08:00",
   "collector_version": "2.0.0",
   "servers": [
     {
@@ -7,7 +7,7 @@
       "host": "140.118.234.7",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-16T07:50:02.320391",
+      "collected_at": "2026-01-16T07:51:02.696252",
       "hostname": "ddc-384-node1",
       "system": {
         "cpu": {
@@ -16,8 +16,8 @@
         },
         "memory": {
           "total_bytes": 540322783232,
-          "available_bytes": 492739514368,
-          "used_bytes": 47583268864,
+          "available_bytes": 492781019136,
+          "used_bytes": 47541764096,
           "usage_percent": 8.8
         },
         "disks": [
@@ -103,7 +103,7 @@
       "host": "140.118.234.12",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-16T07:50:02.446058",
+      "collected_at": "2026-01-16T07:51:03.254907",
       "hostname": "esc4000-e11-h100",
       "system": {
         "cpu": {
@@ -112,8 +112,8 @@
         },
         "memory": {
           "total_bytes": 1081864241152,
-          "available_bytes": 972299321344,
-          "used_bytes": 109564919808,
+          "available_bytes": 972275052544,
+          "used_bytes": 109589188608,
           "usage_percent": 10.1
         },
         "disks": [
@@ -148,7 +148,7 @@
           "index": 0,
           "name": "NVIDIA H100 NVL",
           "uuid": "GPU-d5ead21a-83f7-0d8a-5abb-19502d92a97b",
-          "temperature_celsius": 25,
+          "temperature_celsius": 24,
           "utilization_percent": 0,
           "memory": {
             "used_mb": 0,
@@ -162,8 +162,8 @@
           "index": 1,
           "name": "NVIDIA H100 NVL",
           "uuid": "GPU-22d5173b-1924-a40d-e2bd-1f8e476c6f77",
-          "temperature_celsius": 62,
-          "utilization_percent": 84,
+          "temperature_celsius": 60,
+          "utilization_percent": 100,
           "memory": {
             "used_mb": 62597,
             "total_mb": 95830,
@@ -186,7 +186,7 @@
       "host": "140.118.234.35",
       "status": "online",
       "error_message": null,
-      "collected_at": "2026-01-16T07:50:09.758003",
+      "collected_at": "2026-01-16T07:51:08.484023",
       "hostname": "ddc-384-node0",
       "system": {
         "cpu": {
@@ -195,17 +195,17 @@
         },
         "memory": {
           "total_bytes": 269897707520,
-          "available_bytes": 78528901120,
-          "used_bytes": 191368806400,
-          "usage_percent": 70.9
+          "available_bytes": 78279086080,
+          "used_bytes": 191618621440,
+          "usage_percent": 71.0
         },
         "disks": [
           {
             "device": "/dev/nvme0n1p2",
             "mount_point": "/",
             "total_bytes": 2014574526464,
-            "used_bytes": 959685156864,
-            "available_bytes": 952479096832,
+            "used_bytes": 959685185536,
+            "available_bytes": 952479068160,
             "usage_percent": 47.6
           },
           {
@@ -281,14 +281,6 @@
             "usage_percent": 100.0
           },
           {
-            "device": "/dev/loop13",
-            "mount_point": "/snap/core22/2163",
-            "total_bytes": 77594624,
-            "used_bytes": 77594624,
-            "available_bytes": 0,
-            "usage_percent": 100.0
-          },
-          {
             "device": "/dev/loop15",
             "mount_point": "/snap/snap-store/638",
             "total_bytes": 48234496,
@@ -349,6 +341,14 @@
             "mount_point": "/snap/core24/1267",
             "total_bytes": 70123520,
             "used_bytes": 70123520,
+            "available_bytes": 0,
+            "usage_percent": 100.0
+          },
+          {
+            "device": "/dev/loop1",
+            "mount_point": "/snap/core22/2216",
+            "total_bytes": 77594624,
+            "used_bytes": 77594624,
             "available_bytes": 0,
             "usage_percent": 100.0
           }
